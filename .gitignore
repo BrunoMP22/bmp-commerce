@@ -9,7 +9,10 @@ dist/
 
 # Env / secrets
 .env
+.env.local
 *.log
+appsettings.Development.json
+appsettings.Production.json
 
 # IDE
 .vs/
