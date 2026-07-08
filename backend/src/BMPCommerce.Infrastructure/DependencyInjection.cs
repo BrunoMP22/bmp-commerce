@@ -1,6 +1,8 @@
 using BMPCommerce.Application.Common.Abstractions;
 using BMPCommerce.Application.Common.Interfaces;
+using BMPCommerce.Domain.Interfaces;
 using BMPCommerce.Infrastructure.Persistence.DbContext;
+using BMPCommerce.Infrastructure.Persistence.Repositories;
 using BMPCommerce.Infrastructure.Security;
 using BMPCommerce.Infrastructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
         return services;
     }

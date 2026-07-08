@@ -8,7 +8,8 @@ Frontend do BMP Commerce: React 19 + TypeScript + Vite + Tailwind CSS v4.
 - **TanStack Query** — estado de servidor (cache, loading, erro)
 - **React Hook Form + Zod** — formulários e validação
 - **Lucide React** — ícones
-- **Componentes estilo shadcn/ui** — Radix UI + `class-variance-authority` + `tailwind-merge`, escritos manualmente em `src/components/ui/`
+- **Sonner** — toasts de sucesso/erro
+- **Componentes estilo shadcn/ui** — Radix UI + `class-variance-authority` + `tailwind-merge`, escritos manualmente em `src/components/ui/` (button, input, label, card, table, dialog, alert-dialog, badge, textarea, select, checkbox)
 
 ## Rodando localmente
 
@@ -34,17 +35,33 @@ A URL da API é lida de `VITE_API_URL` (já configurada em `.env.development` pa
 
 ```
 src/
-  api/              Cliente HTTP (fetch) e chamadas à API (auth)
+  api/              Cliente HTTP (fetch) e chamadas à API (auth, produtos)
   components/
-    ui/             Primitivas de UI (button, input, label, card)
-    layout/         Sidebar, Header, Breadcrumb, StatCard, ProtectedRoute
+    ui/             Primitivas de UI (button, input, label, card, table, dialog, alert-dialog, badge, textarea, select, checkbox)
+    layout/         Sidebar, Header, Breadcrumb, StatCard, ThemeToggle, ProtectedRoute
   features/         Uma pasta por área de negócio (auth, dashboard, produtos, clientes, vendas, insights, configuracoes, perfil)
   hooks/            Hooks reutilizáveis (ex: use-theme)
   layouts/          Shells de página (AppLayout: sidebar + header + conteúdo)
-  lib/              Utilitários, contexto de autenticação, storage local
+  lib/              Utilitários, contexto de autenticação, storage local, tratamento de erro de API
   types/            Tipos TypeScript compartilhados
 ```
 
 ## Autenticação
 
 O JWT retornado pelo login é persistido em `localStorage` (via `src/lib/auth-context.tsx` + `src/lib/auth-storage.ts`) e anexado automaticamente como header `Authorization: Bearer` em todas as chamadas autenticadas (`src/api/client.ts`). Rotas protegidas usam `ProtectedRoute`/`PublicOnlyRoute` (`src/components/layout/ProtectedRoute.tsx`).
+
+## Padrão de um módulo CRUD (referência: Produtos)
+
+Cada área de negócio com CRUD segue o mesmo esqueleto, usado como referência para novos módulos (ex: Clientes):
+
+```
+types/<recurso>.ts                          Tipos compartilhados (entidade + payloads)
+api/<recurso>s.ts                            Chamadas à API (list/get/create/update/delete)
+features/<recurso>s/
+  <Recurso>sPage.tsx                         Página: header, indicadores, busca/filtro, tabela, paginação
+  <Recurso>FormDialog.tsx                    Dialog de criar/editar (mesmo formulário para os dois fluxos)
+  Delete<Recurso>Dialog.tsx                  AlertDialog de confirmação de exclusão
+  <recurso>-schema.ts                        Schema Zod do formulário
+```
+
+Busca, filtro e paginação são feitos no cliente sobre a lista completa (buscada uma única vez), não a cada requisição — ver [docs/06-sprint-1.5-refinamento-mvp.md](../../docs/06-sprint-1.5-refinamento-mvp.md) para o racional.

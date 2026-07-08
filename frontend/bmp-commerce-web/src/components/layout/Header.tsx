@@ -1,8 +1,8 @@
-import { Menu, Moon, Sun } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
-import { useTheme } from '@/hooks/use-theme'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 function getInitials(name: string) {
   return name
@@ -19,7 +19,6 @@ interface HeaderProps {
 
 export function Header({ onOpenMobileMenu }: HeaderProps) {
   const { user } = useAuth()
-  const { theme, toggleTheme } = useTheme()
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/80 px-4 backdrop-blur sm:px-6">
@@ -38,9 +37,7 @@ export function Header({ onOpenMobileMenu }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button type="button" variant="ghost" size="icon" onClick={toggleTheme} aria-label="Alternar tema">
-          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-        </Button>
+        <ThemeToggle />
 
         {user && (
           <div className="flex items-center gap-2.5 border-l border-border pl-3">

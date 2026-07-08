@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import type { LucideIcon } from 'lucide-react'
 import { ChevronsLeft, ChevronsRight, LogOut, Sparkles, UserCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { navItems } from '@/lib/nav-items'
@@ -9,6 +10,44 @@ interface SidebarProps {
   onToggleCollapsed: () => void
   mobileOpen: boolean
   onCloseMobile: () => void
+}
+
+interface SidebarNavLinkProps {
+  to: string
+  label: string
+  icon: LucideIcon
+  collapsed: boolean
+  onClick: () => void
+}
+
+function SidebarNavLink({ to, label, icon: Icon, collapsed, onClick }: SidebarNavLinkProps) {
+  return (
+    <NavLink
+      to={to}
+      onClick={onClick}
+      title={label}
+      className={({ isActive }) =>
+        cn(
+          'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          isActive ? 'bg-primary/10 text-primary' : 'text-sidebar-foreground hover:bg-muted',
+          collapsed && 'lg:justify-center lg:px-2',
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span
+            className={cn(
+              'absolute inset-y-1 left-0 w-0.5 rounded-full bg-primary transition-opacity',
+              isActive ? 'opacity-100' : 'opacity-0',
+            )}
+          />
+          <Icon className="size-4 shrink-0" />
+          <span className={cn(collapsed && 'lg:hidden')}>{label}</span>
+        </>
+      )}
+    </NavLink>
+  )
 }
 
 export function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }: SidebarProps) {
@@ -56,43 +95,25 @@ export function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobil
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navItems.map((item) => (
-            <NavLink
+            <SidebarNavLink
               key={item.path}
               to={item.path}
+              label={item.label}
+              icon={item.icon}
+              collapsed={collapsed}
               onClick={onCloseMobile}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-sidebar-foreground hover:bg-muted',
-                  collapsed && 'lg:justify-center lg:px-2',
-                )
-              }
-              title={item.label}
-            >
-              <item.icon className="size-4 shrink-0" />
-              <span className={cn(collapsed && 'lg:hidden')}>{item.label}</span>
-            </NavLink>
+            />
           ))}
         </nav>
 
         <div className="space-y-1 border-t border-border px-3 py-4">
-          <NavLink
+          <SidebarNavLink
             to="/perfil"
+            label="Perfil"
+            icon={UserCircle}
+            collapsed={collapsed}
             onClick={onCloseMobile}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActive ? 'bg-primary/10 text-primary' : 'text-sidebar-foreground hover:bg-muted',
-                collapsed && 'lg:justify-center lg:px-2',
-              )
-            }
-            title="Perfil"
-          >
-            <UserCircle className="size-4 shrink-0" />
-            <span className={cn(collapsed && 'lg:hidden')}>Perfil</span>
-          </NavLink>
+          />
 
           <button
             type="button"

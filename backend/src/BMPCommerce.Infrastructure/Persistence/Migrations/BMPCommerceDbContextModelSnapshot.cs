@@ -22,6 +22,68 @@ namespace BMPCommerce.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BMPCommerce.Domain.Entities.Produto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Categoria")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CodigoBarras")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("EstoqueAtual")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EstoqueMinimo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("PrecoCusto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecoVenda")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UnidadeMedida")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
+                    b.ToTable("Produtos", (string)null);
+                });
+
             modelBuilder.Entity("BMPCommerce.Domain.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")

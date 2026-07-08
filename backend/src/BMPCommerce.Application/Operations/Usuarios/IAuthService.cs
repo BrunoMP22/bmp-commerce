@@ -6,5 +6,5 @@ public interface IAuthService
 {
     Task<Result<LoginResult>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
 
-    Task<Result<AuthenticatedUserResult>> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken);
+    Task<AuthenticatedUserResult> ObterUsuarioAtualAsync(Guid userId, CancellationToken cancellationToken);
 }

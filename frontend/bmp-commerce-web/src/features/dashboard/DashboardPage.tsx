@@ -15,20 +15,26 @@ export function DashboardPage() {
 
   const current = meQuery.data ?? user
   const connectionStatus = meQuery.isError ? 'error' : meQuery.isSuccess ? 'success' : 'pending'
+  const firstName = current?.name.split(' ')[0]
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Visão geral temporária do primeiro marco executável do BMP Commerce.
+          {firstName ? `Bem-vindo de volta, ${firstName}.` : 'Bem-vindo de volta.'}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Empresa" value={current?.tenantName ?? 'Plataforma (sem tenant)'} icon={Building2} />
-        <StatCard title="Usuário" value={current?.name ?? '—'} icon={UserCircle} />
-        <StatCard title="Cargo" value={current?.role ?? '—'} icon={ShieldCheck} />
+        <StatCard
+          title="Empresa"
+          value={current?.tenantName ?? 'Plataforma (sem tenant)'}
+          icon={Building2}
+          tone="blue"
+        />
+        <StatCard title="Usuário" value={current?.name ?? '—'} icon={UserCircle} tone="blue" />
+        <StatCard title="Cargo" value={current?.role ?? '—'} icon={ShieldCheck} tone="blue" />
         <StatCard
           title="API"
           value={meQuery.isError ? 'Indisponível' : meQuery.isSuccess ? 'Online' : 'Verificando...'}

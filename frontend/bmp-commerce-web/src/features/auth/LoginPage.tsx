@@ -3,20 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Lock, Mail, Moon, Sparkles, Sun } from 'lucide-react'
+import { AlertCircle, Loader2, Lock, Mail, Sparkles } from 'lucide-react'
 import { login } from '@/api/auth'
-import { ApiError } from '@/api/client'
 import { useAuth } from '@/lib/auth-context'
-import { useTheme } from '@/hooks/use-theme'
+import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { loginSchema, type LoginFormValues } from '@/features/auth/login-schema'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const { signIn } = useAuth()
-  const { theme, toggleTheme } = useTheme()
 
   const {
     register,
@@ -34,7 +33,7 @@ export function LoginPage() {
       navigate('/dashboard', { replace: true })
     },
     onError: (error) => {
-      setFormError(error instanceof ApiError ? error.message : 'Não foi possível entrar. Tente novamente.')
+      setFormError(getErrorMessage(error, 'Não foi possível entrar. Tente novamente.'))
     },
   })
 
@@ -70,15 +69,7 @@ export function LoginPage() {
               <h2 className="text-2xl font-semibold tracking-tight">Entrar no BMP Commerce</h2>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Alternar tema"
-            >
-              {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
+            <ThemeToggle variant="outline" />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

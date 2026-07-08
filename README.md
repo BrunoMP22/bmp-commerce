@@ -2,30 +2,31 @@
 
 Sistema de e-commerce/gestão comercial multi-tenant, com backend em .NET (Clean Architecture) e frontend em React + TypeScript.
 
-## Status atual: Marco 1 — primeira versão executável
+## Status atual: Sprint 1.5 — Refinamento do MVP concluído
 
-Login funcional de ponta a ponta: API + banco de dados + autenticação JWT + frontend consumindo tudo isso.
+Login completo + primeiro módulo de negócio (Produtos) funcionando de ponta a ponta, com o código já revisado e consolidado antes de avançar para Clientes.
 
-- ✅ **Domain**: entidades `Tenant` e `Usuario`, value object `Email`, enum `UserRole`, invariantes de negócio
-- ✅ **Application**: contratos (`IApplicationDbContext`, `IJwtService`, `IPasswordHasher`, `ITenantProvider`, `ICurrentUserService`) e caso de uso de autenticação (`AuthService`)
-- ✅ **Infrastructure**: EF Core + SQL Server, migrations, BCrypt, geração de JWT, seed automático
-- ✅ **API**: `POST /api/auth/login`, `GET /api/auth/me`, Swagger com autenticação Bearer, CORS, criação automática do banco no startup
-- ✅ **Frontend**: tela de login, dashboard temporário, sidebar/header/breadcrumb, dark mode persistente, layout responsivo
-- ⏳ **Próximo passo**: Sprint 1 — CRUD de Categorias/Produtos/Clientes (cadastros base)
+- ✅ **Domain**: entidades `Tenant`, `Usuario`, `Produto`, value object `Email`, enums `UserRole`/`UnidadeMedida`, invariantes de negócio
+- ✅ **Application**: contratos de infraestrutura, casos de uso de autenticação (`AuthService`) e de Produtos (`ProdutoService`), padrão único de erros (`Result` para regra de negócio, `NotFoundException` para recurso inexistente)
+- ✅ **Infrastructure**: EF Core + SQL Server, migrations, BCrypt, geração de JWT, seed automático, repositório de Produtos
+- ✅ **API**: autenticação (`/api/auth/*`) e CRUD completo de Produtos (`/api/produtos`), middleware central de tratamento de erros, Swagger com Bearer, CORS
+- ✅ **Frontend**: login, dashboard, **CRUD completo de Produtos** (listagem com indicadores, busca, filtro de status, paginação, criar/editar/excluir), sidebar/header/breadcrumb, dark mode persistente, layout responsivo (desktop/tablet/mobile)
+- ✅ **Sprint 1.5**: auditoria de consistência entre módulos, eliminação de código duplicado, documentação de arquitetura (ver [docs/06-sprint-1.5-refinamento-mvp.md](docs/06-sprint-1.5-refinamento-mvp.md))
+- ⏳ **Próximo passo**: módulo Clientes
 
 O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
 
 ## Arquitetura
 
-Clean Architecture com 4 camadas (API → Application → Domain ← Infrastructure), sem MediatR. Multi-tenancy por banco único com `TenantId`. Decisões registradas em [ADRs](docs/ADR/).
+Clean Architecture com 4 camadas (API → Application → Domain ← Infrastructure), sem MediatR. Multi-tenancy por banco único com `TenantId`. Decisões registradas em [ADRs](docs/ADR/). Convenções de código e o padrão de "vertical slice" para novos módulos estão documentados em [backend/README.md](backend/README.md).
 
 ```
 backend/
   src/
-    BMPCommerce.API/             API REST — controllers, Program.cs, configuração de JWT/Swagger/CORS
-    BMPCommerce.Application/     Casos de uso (Operations/), contratos (Common/), motor de insights (Insights/)
+    BMPCommerce.API/             API REST — controllers, middlewares, Program.cs (JWT/Swagger/CORS)
+    BMPCommerce.Application/     Casos de uso (Operations/), contratos (Common/)
     BMPCommerce.Domain/          Entidades, enums, value objects, exceções e regras de negócio puras
-    BMPCommerce.Infrastructure/  EF Core, migrations, seed, JWT/BCrypt, tenancy
+    BMPCommerce.Infrastructure/  EF Core, migrations, seed, JWT/BCrypt, repositórios, tenancy
   tests/
     BMPCommerce.UnitTests/
     BMPCommerce.IntegrationTests/
@@ -34,7 +35,7 @@ frontend/
   bmp-commerce-web/              SPA React + TS + Vite (organizada por features) — ver README próprio
 
 infra/                           Docker Compose e Dockerfiles
-docs/                            Documentação de produto, domínio e arquitetura (+ ADRs)
+docs/                            Documentação de produto, domínio e arquitetura (+ ADRs, screenshots)
 ```
 
 ## Documentação
@@ -44,7 +45,10 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Arquitetura de solução](docs/03-arquitetura-de-solucao.md)
 - [Plano de implementação (sprints)](docs/04-plano-de-implementacao-sprints.md)
 - [Estrutura do monorepo](docs/05-estrutura-monorepo.md)
+- [Sprint 1.5 — Refinamento do MVP](docs/06-sprint-1.5-refinamento-mvp.md) (changelog + decisões + screenshots)
 - [ADRs](docs/ADR/)
+- [Backend — arquitetura e convenções](backend/README.md)
+- [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)
 
 ## Como rodar localmente
 

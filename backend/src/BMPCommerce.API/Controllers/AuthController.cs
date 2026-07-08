@@ -41,13 +41,7 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await _authService.GetCurrentUserAsync(userId, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return NotFound(new { message = result.Error });
-        }
-
-        return Ok(result.Value);
+        var usuario = await _authService.ObterUsuarioAtualAsync(userId, cancellationToken);
+        return Ok(usuario);
     }
 }
