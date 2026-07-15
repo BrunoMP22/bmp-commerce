@@ -27,6 +27,10 @@ public class Produto : BaseEntity
 
     public bool Ativo { get; private set; }
 
+    // Concorrência otimista (Doc 01 REGRA 2 / Doc 02 PADRÃO 5): o SQL Server preenche
+    // e atualiza esta coluna automaticamente; o EF a usa para detectar vendas simultâneas.
+    public byte[] RowVersion { get; private set; } = [];
+
     // Exigido pelo EF Core para materializar a entidade via reflexão; o estado real é
     // preenchido logo em seguida a partir das colunas, nunca fica exposto sem passar por aqui.
     private Produto()
@@ -88,6 +92,37 @@ public class Produto : BaseEntity
         EstoqueAtual = estoqueAtual;
         EstoqueMinimo = estoqueMinimo;
         Ativo = ativo;
+        MarkAsUpdated();
+    }
+
+    // Baixa de estoque da venda (Doc 01 REGRA 1): nunca deixa o estoque negativo —
+    // estoque insuficiente bloqueia a venda inteira, nada é debitado.
+    public void BaixarEstoque(int quantidade)
+    {
+        if (quantidade <= 0)
+        {
+            throw new DomainException("Quantidade deve ser maior que zero.");
+        }
+
+        if (EstoqueAtual < quantidade)
+        {
+            throw new DomainException(
+                $"Estoque insuficiente para o produto '{Nome}'. Disponível: {EstoqueAtual}, solicitado: {quantidade}.");
+        }
+
+        EstoqueAtual -= quantidade;
+        MarkAsUpdated();
+    }
+
+    // Estorno usado no cancelamento de venda: devolve os itens ao estoque.
+    public void ReporEstoque(int quantidade)
+    {
+        if (quantidade <= 0)
+        {
+            throw new DomainException("Quantidade deve ser maior que zero.");
+        }
+
+        EstoqueAtual += quantidade;
         MarkAsUpdated();
     }
 

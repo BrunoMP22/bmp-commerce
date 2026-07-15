@@ -54,6 +54,9 @@ public class ProdutoConfiguration : IEntityTypeConfiguration<Produto>
         builder.Property(p => p.Ativo)
             .IsRequired();
 
+        builder.Property(p => p.RowVersion)
+            .IsRowVersion();
+
         builder.Property(p => p.CreatedAt)
             .IsRequired();
     }

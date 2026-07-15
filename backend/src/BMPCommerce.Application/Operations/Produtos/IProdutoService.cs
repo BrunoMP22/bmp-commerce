@@ -12,5 +12,5 @@ public interface IProdutoService
 
     Task<Result<ProdutoDto>> AtualizarAsync(Guid id, AtualizarProdutoRequest request, CancellationToken cancellationToken);
 
-    Task ExcluirAsync(Guid id, CancellationToken cancellationToken);
+    Task<Result> ExcluirAsync(Guid id, CancellationToken cancellationToken);
 }

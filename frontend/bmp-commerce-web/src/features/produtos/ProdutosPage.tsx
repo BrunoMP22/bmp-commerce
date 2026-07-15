@@ -49,7 +49,10 @@ export function ProdutosPage() {
 
   const stats = React.useMemo(() => {
     const ativos = produtos.filter((produto) => produto.ativo).length
-    const abaixoDoMinimo = produtos.filter((produto) => produto.estoqueAtual < produto.estoqueMinimo).length
+    // Mesma definição do dashboard: "abaixo do mínimo" não inclui os zerados.
+    const abaixoDoMinimo = produtos.filter(
+      (produto) => produto.estoqueAtual > 0 && produto.estoqueAtual < produto.estoqueMinimo,
+    ).length
     const valorTotalEstoque = produtos.reduce(
       (total, produto) => total + produto.precoCusto * produto.estoqueAtual,
       0,
@@ -222,20 +225,23 @@ export function ProdutosPage() {
             </TableHeader>
             <TableBody>
               {paginated.map((produto) => {
-                const estoqueBaixo = produto.estoqueAtual < produto.estoqueMinimo
+                const semEstoque = produto.estoqueAtual === 0
+                const estoqueBaixo = !semEstoque && produto.estoqueAtual < produto.estoqueMinimo
 
                 return (
                   <TableRow key={produto.id}>
                     <TableCell className="font-medium">{produto.nome}</TableCell>
                     <TableCell className="text-muted-foreground">{produto.sku}</TableCell>
                     <TableCell className="text-right tabular-nums">{formatCurrency(produto.precoVenda)}</TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      <span className={cn(estoqueBaixo && 'font-medium text-amber-600 dark:text-amber-400')}>
-                        {produto.estoqueAtual}
-                      </span>
-                      {estoqueBaixo && (
-                        <span className="ml-1.5 text-xs text-amber-600 dark:text-amber-400">abaixo do mínimo</span>
-                      )}
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className={cn('tabular-nums', semEstoque && 'text-destructive', estoqueBaixo && 'text-amber-600 dark:text-amber-400')}>
+                          {produto.estoqueAtual}
+                        </span>
+                        <Badge variant={semEstoque ? 'destructive' : estoqueBaixo ? 'warning' : 'success'}>
+                          {semEstoque ? 'Sem estoque' : estoqueBaixo ? 'Baixo' : 'Normal'}
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant={produto.ativo ? 'success' : 'muted'}>

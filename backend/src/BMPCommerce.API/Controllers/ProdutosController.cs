@@ -59,7 +59,13 @@ public class ProdutosController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Excluir(Guid id, CancellationToken cancellationToken)
     {
-        await _produtoService.ExcluirAsync(id, cancellationToken);
+        var result = await _produtoService.ExcluirAsync(id, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new { message = result.Error });
+        }
+
         return NoContent();
     }
 }

@@ -13,4 +13,51 @@ Content-Type: application/json
 GET {{BMPCommerce.API_HostAddress}}/api/auth/me
 Authorization: Bearer {{token}}
 
+### Listar produtos
+GET {{BMPCommerce.API_HostAddress}}/api/produtos?search=
+Authorization: Bearer {{token}}
+
+### Listar clientes
+GET {{BMPCommerce.API_HostAddress}}/api/clientes
+Authorization: Bearer {{token}}
+
+### Criar cliente
+POST {{BMPCommerce.API_HostAddress}}/api/clientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Cliente Exemplo",
+  "cpfCnpj": "390.533.447-05",
+  "telefone": "(11) 91234-5678",
+  "email": "cliente@exemplo.com",
+  "cidade": "São Paulo",
+  "estado": "SP",
+  "observacoes": null
+}
+
+### Listar vendas
+GET {{BMPCommerce.API_HostAddress}}/api/vendas
+Authorization: Bearer {{token}}
+
+### Registrar venda (troque os GUIDs por ids reais; clienteId pode ser null = balcão)
+POST {{BMPCommerce.API_HostAddress}}/api/vendas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clienteId": null,
+  "itens": [
+    { "produtoId": "00000000-0000-0000-0000-000000000000", "quantidade": 2 }
+  ]
+}
+
+### Cancelar venda (soft delete + estorno de estoque)
+POST {{BMPCommerce.API_HostAddress}}/api/vendas/00000000-0000-0000-0000-000000000000/cancelar
+Authorization: Bearer {{token}}
+
+### Dashboard (indicadores + vendas por dia)
+GET {{BMPCommerce.API_HostAddress}}/api/dashboard
+Authorization: Bearer {{token}}
+
 ###

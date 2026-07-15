@@ -34,6 +34,15 @@ Infrastructure/Persistence/
 API/Controllers/<Recurso>sController.cs      endpoints REST
 ```
 
+**Onde há regra de negócio real, o Domain usa agregado DDD** (Doc 01 §6): `Venda` nasce pela
+factory `Venda.Registrar(...)` que valida todas as invariantes (estoque, itens, congelamento de
+preço/custo) e é persistida por um único `SaveChangesAsync` — uma transação. CRUDs simples
+(Cliente, Categoria) não ganham agregado. Leitura/analytics vive em `Application/Insights/`
+(nunca escreve — ADR 0004); hoje abriga o `DashboardService`.
+
+**Concorrência:** `Produto` e `Venda` têm `RowVersion` (SQL Server `rowversion`). Conflito de
+escrita simultânea vira `DbUpdateConcurrencyException` → middleware responde 409.
+
 ## Tratamento de erros
 
 Centralizado em `API/Middlewares/ExceptionHandlingMiddleware.cs`, que captura exceções lançadas pelas camadas internas e converte para uma resposta HTTP consistente no formato `{ "message": "..." }`:

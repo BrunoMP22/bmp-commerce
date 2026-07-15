@@ -10,11 +10,16 @@ namespace BMPCommerce.Application.Operations.Produtos;
 public class ProdutoService : IProdutoService
 {
     private readonly IProdutoRepository _produtoRepository;
+    private readonly IVendaRepository _vendaRepository;
     private readonly IApplicationDbContext _dbContext;
 
-    public ProdutoService(IProdutoRepository produtoRepository, IApplicationDbContext dbContext)
+    public ProdutoService(
+        IProdutoRepository produtoRepository,
+        IVendaRepository vendaRepository,
+        IApplicationDbContext dbContext)
     {
         _produtoRepository = produtoRepository;
+        _vendaRepository = vendaRepository;
         _dbContext = dbContext;
     }
 
@@ -95,13 +100,21 @@ public class ProdutoService : IProdutoService
         return Result<ProdutoDto>.Success(MapToDto(produto));
     }
 
-    public async Task ExcluirAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Result> ExcluirAsync(Guid id, CancellationToken cancellationToken)
     {
         var produto = await _produtoRepository.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Produto não encontrado.");
 
+        // Preserva o histórico de vendas (Doc 01 REGRA 4): produto vendido não sai do banco.
+        if (await _vendaRepository.ExisteVendaComProdutoAsync(id, cancellationToken))
+        {
+            return Result.Failure("Produto possui vendas registradas e não pode ser excluído. Inative-o em vez de excluir.");
+        }
+
         _produtoRepository.Remove(produto);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 
     private static ProdutoDto MapToDto(Produto produto) => new(

@@ -18,6 +18,10 @@ public class BMPCommerceDbContext : Microsoft.EntityFrameworkCore.DbContext, IAp
 
     public DbSet<Produto> Produtos => Set<Produto>();
 
+    public DbSet<Cliente> Clientes => Set<Cliente>();
+
+    public DbSet<Venda> Vendas => Set<Venda>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

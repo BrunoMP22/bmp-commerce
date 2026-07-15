@@ -9,6 +9,7 @@ Frontend do BMP Commerce: React 19 + TypeScript + Vite + Tailwind CSS v4.
 - **React Hook Form + Zod** — formulários e validação
 - **Lucide React** — ícones
 - **Sonner** — toasts de sucesso/erro
+- **Recharts** — gráfico de vendas do dashboard (cores via CSS variables do tema)
 - **Componentes estilo shadcn/ui** — Radix UI + `class-variance-authority` + `tailwind-merge`, escritos manualmente em `src/components/ui/` (button, input, label, card, table, dialog, alert-dialog, badge, textarea, select, checkbox)
 
 ## Rodando localmente
@@ -65,3 +66,5 @@ features/<recurso>s/
 ```
 
 Busca, filtro e paginação são feitos no cliente sobre a lista completa (buscada uma única vez), não a cada requisição — ver [docs/06-sprint-1.5-refinamento-mvp.md](../../docs/06-sprint-1.5-refinamento-mvp.md) para o racional.
+
+**Exceção ao padrão — Vendas:** além da listagem (`VendasPage`, com filtros de período/cliente/status e ordenação), o módulo tem uma página dedicada de fluxo (`NovaVendaPage` em `/vendas/nova`, layout estilo PDV com carrinho e resumo em tempo real) e usa `CancelarVendaDialog` no lugar de exclusão — venda nunca é excluída, apenas cancelada com estorno de estoque (ver [docs/07-sprint-2-fluxo-comercial-completo.md](../../docs/07-sprint-2-fluxo-comercial-completo.md)).

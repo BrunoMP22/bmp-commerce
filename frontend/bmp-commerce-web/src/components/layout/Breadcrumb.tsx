@@ -4,6 +4,7 @@ import { navItems } from '@/lib/nav-items'
 
 const extraLabels: Record<string, string> = {
   '/perfil': 'Perfil',
+  '/vendas/nova': 'Nova Venda',
 }
 
 export function Breadcrumb() {

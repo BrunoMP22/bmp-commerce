@@ -2,19 +2,19 @@
 
 Sistema de e-commerce/gestão comercial multi-tenant, com backend em .NET (Clean Architecture) e frontend em React + TypeScript.
 
-## Status atual: Sprint 1.5 — Refinamento do MVP concluído
+## Status atual: Sprint 2 — Fluxo comercial completo
 
-Login completo + primeiro módulo de negócio (Produtos) funcionando de ponta a ponta, com o código já revisado e consolidado antes de avançar para Clientes.
+O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e clientes → **registro de venda com baixa automática de estoque** → dashboard com indicadores e gráfico alimentados por dados reais.
 
-- ✅ **Domain**: entidades `Tenant`, `Usuario`, `Produto`, value object `Email`, enums `UserRole`/`UnidadeMedida`, invariantes de negócio
-- ✅ **Application**: contratos de infraestrutura, casos de uso de autenticação (`AuthService`) e de Produtos (`ProdutoService`), padrão único de erros (`Result` para regra de negócio, `NotFoundException` para recurso inexistente)
-- ✅ **Infrastructure**: EF Core + SQL Server, migrations, BCrypt, geração de JWT, seed automático, repositório de Produtos
-- ✅ **API**: autenticação (`/api/auth/*`) e CRUD completo de Produtos (`/api/produtos`), middleware central de tratamento de erros, Swagger com Bearer, CORS
-- ✅ **Frontend**: login, dashboard, **CRUD completo de Produtos** (listagem com indicadores, busca, filtro de status, paginação, criar/editar/excluir), sidebar/header/breadcrumb, dark mode persistente, layout responsivo (desktop/tablet/mobile)
-- ✅ **Sprint 1.5**: auditoria de consistência entre módulos, eliminação de código duplicado, documentação de arquitetura (ver [docs/06-sprint-1.5-refinamento-mvp.md](docs/06-sprint-1.5-refinamento-mvp.md))
-- ⏳ **Próximo passo**: módulo Clientes
+- ✅ **Produtos**: CRUD completo com indicadores, busca, filtro, paginação e badges de estoque (Normal/Baixo/Sem estoque)
+- ✅ **Clientes**: CRUD completo com indicadores (total, ativos, inativos, novos no mês), CPF/CNPJ validado e formatado
+- ✅ **Vendas**: fluxo de venda estilo PDV (`/vendas/nova`) — cliente opcional (balcão), busca de produtos, carrinho com quantidades, resumo em tempo real; listagem com filtros por período/cliente/status, ordenação, detalhes e **cancelamento com estorno de estoque**
+- ✅ **Estoque**: baixa automática na venda, nunca negativo (venda bloqueada), concorrência otimista com RowVersion (409 em conflito), preço/custo **congelados** no item para margem histórica
+- ✅ **Dashboard**: receita total, vendas, ticket médio, valor do estoque, clientes, produtos, alertas de estoque + gráfico de vendas dos últimos 14 dias (Recharts)
+- ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + 20 vendas consistentes criados automaticamente em banco vazio
+- ⏳ **Próximo passo**: Motor de Insights (frases de negócio) e dashboard por papel
 
-O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
+Detalhes da sprint em [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-sprint-2-fluxo-comercial-completo.md). O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
 
 ## Arquitetura
 
@@ -46,6 +46,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Plano de implementação (sprints)](docs/04-plano-de-implementacao-sprints.md)
 - [Estrutura do monorepo](docs/05-estrutura-monorepo.md)
 - [Sprint 1.5 — Refinamento do MVP](docs/06-sprint-1.5-refinamento-mvp.md) (changelog + decisões + screenshots)
+- [Sprint 2 — Fluxo comercial completo](docs/07-sprint-2-fluxo-comercial-completo.md) (Clientes, Vendas, Estoque, Dashboard)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)

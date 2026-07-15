@@ -8,6 +8,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ProdutosPage } from '@/features/produtos/ProdutosPage'
 import { ClientesPage } from '@/features/clientes/ClientesPage'
 import { VendasPage } from '@/features/vendas/VendasPage'
+import { NovaVendaPage } from '@/features/vendas/NovaVendaPage'
 import { InsightsPage } from '@/features/insights/InsightsPage'
 import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
 import { PerfilPage } from '@/features/perfil/PerfilPage'
@@ -30,6 +31,7 @@ function App() {
             <Route path="/produtos" element={<ProdutosPage />} />
             <Route path="/clientes" element={<ClientesPage />} />
             <Route path="/vendas" element={<VendasPage />} />
+            <Route path="/vendas/nova" element={<NovaVendaPage />} />
             <Route path="/insights" element={<InsightsPage />} />
             <Route path="/configuracoes" element={<ConfiguracoesPage />} />
             <Route path="/perfil" element={<PerfilPage />} />
