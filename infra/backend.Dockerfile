@@ -1,18 +1,31 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
-
-COPY backend/BMPCommerce.sln ./
-COPY backend/src/BMPCommerce.Domain/BMPCommerce.Domain.csproj src/BMPCommerce.Domain/
-COPY backend/src/BMPCommerce.Application/BMPCommerce.Application.csproj src/BMPCommerce.Application/
-COPY backend/src/BMPCommerce.Infrastructure/BMPCommerce.Infrastructure.csproj src/BMPCommerce.Infrastructure/
-COPY backend/src/BMPCommerce.API/BMPCommerce.API.csproj src/BMPCommerce.API/
-RUN dotnet restore src/BMPCommerce.API/BMPCommerce.API.csproj
-
-COPY backend/src/ src/
-RUN dotnet publish src/BMPCommerce.API/BMPCommerce.API.csproj -c Release -o /app --no-restore
-
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM python:3.13-slim AS runtime
 WORKDIR /app
-COPY --from=build /app ./
 
-ENTRYPOINT ["dotnet", "BMPCommerce.API.dll"]
+# pyodbc precisa do unixODBC + do driver ODBC da Microsoft para SQL Server instalados no
+# SO (o wheel do pyodbc só traz o binding Python — a conexão em si passa pelo driver
+# nativo, igual ao pyodbc usado em desenvolvimento no Windows com o "ODBC Driver 17/18
+# for SQL Server"). gcc/g++ só são necessários durante a instalação e são removidos
+# depois para manter a imagem final enxuta.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl gnupg unixodbc unixodbc-dev gcc g++ \
+    && curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && rm packages-microsoft-prod.deb \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
+    && apt-get purge -y --auto-remove gcc g++ curl gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/alembic.ini ./
+COPY backend/alembic ./alembic
+COPY backend/app ./app
+
+EXPOSE 8080
+
+# Migrations não rodam automaticamente aqui (mesma característica do Program.cs
+# original, que só migrava/semeava em Development) — rode `alembic upgrade head`
+# manualmente contra o banco do container antes do primeiro uso; ver backend/README.md.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

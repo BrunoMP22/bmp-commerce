@@ -11,6 +11,7 @@ vira um arquivo numerado nesta pasta.
 | 0002 | [Clean Architecture em 4 camadas](0002-clean-architecture-4-camadas.md) | Aceita |
 | 0003 | [Serviços simples, sem MediatR](0003-servicos-simples-sem-mediatr.md) | Aceita |
 | 0004 | [Insights como motor de regras](0004-insights-como-motor-de-regras.md) | Aceita |
+| 0005 | [Migração do backend de .NET/ASP.NET Core para Python/FastAPI](0005-migracao-backend-dotnet-para-python-fastapi.md) | Aceita |
 
 ## Template
 

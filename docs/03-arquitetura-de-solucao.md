@@ -6,6 +6,15 @@
 **Versão:** 1.0
 **Depende de:** Documentos 01 e 02
 
+> **Nota (2026-07-22):** as 4 camadas e a regra de dependência descritas aqui
+> continuam valendo à risca — só a tecnologia de implementação mudou (backend
+> reescrito de .NET/EF Core para Python/FastAPI/SQLAlchemy). Onde este documento cita
+> `BMPCommerce.Domain`, `EF Core` etc., leia como os equivalentes Python
+> (`app/domain/`, SQLAlchemy...) — mapeamento completo em
+> [ADR 0005](ADR/0005-migracao-backend-dotnet-para-python-fastapi.md) e
+> [docs/08](08-migracao-backend-python-fastapi.md). Preservado abaixo como registro
+> histórico da decisão original.
+
 ---
 
 ## 1. As 4 camadas (visão geral)

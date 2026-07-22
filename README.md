@@ -1,6 +1,6 @@
 # BMP Commerce
 
-Sistema de e-commerce/gestão comercial multi-tenant, com backend em .NET (Clean Architecture) e frontend em React + TypeScript.
+Sistema de e-commerce/gestão comercial multi-tenant, com backend em Python/FastAPI (Clean Architecture) e frontend em React + TypeScript.
 
 ## Status atual: Sprint 2 — Fluxo comercial completo
 
@@ -9,7 +9,7 @@ O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e cl
 - ✅ **Produtos**: CRUD completo com indicadores, busca, filtro, paginação e badges de estoque (Normal/Baixo/Sem estoque)
 - ✅ **Clientes**: CRUD completo com indicadores (total, ativos, inativos, novos no mês), CPF/CNPJ validado e formatado
 - ✅ **Vendas**: fluxo de venda estilo PDV (`/vendas/nova`) — cliente opcional (balcão), busca de produtos, carrinho com quantidades, resumo em tempo real; listagem com filtros por período/cliente/status, ordenação, detalhes e **cancelamento com estorno de estoque**
-- ✅ **Estoque**: baixa automática na venda, nunca negativo (venda bloqueada), concorrência otimista com RowVersion (409 em conflito), preço/custo **congelados** no item para margem histórica
+- ✅ **Estoque**: baixa automática na venda, nunca negativo (venda bloqueada), concorrência otimista (409 em conflito), preço/custo **congelados** no item para margem histórica
 - ✅ **Dashboard**: receita total, vendas, ticket médio, valor do estoque, clientes, produtos, alertas de estoque + gráfico de vendas dos últimos 14 dias (Recharts)
 - ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + 20 vendas consistentes criados automaticamente em banco vazio
 - ⏳ **Próximo passo**: Motor de Insights (frases de negócio) e dashboard por papel
@@ -18,18 +18,23 @@ Detalhes da sprint em [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-spr
 
 ## Arquitetura
 
-Clean Architecture com 4 camadas (API → Application → Domain ← Infrastructure), sem MediatR. Multi-tenancy por banco único com `TenantId`. Decisões registradas em [ADRs](docs/ADR/). Convenções de código e o padrão de "vertical slice" para novos módulos estão documentados em [backend/README.md](backend/README.md).
+Clean Architecture com 4 camadas (api/routers → services → domain ← repositories/models), sem MediatR. Multi-tenancy por banco único com `TenantId`. Decisões registradas em [ADRs](docs/ADR/), incluindo a migração do backend de .NET para Python ([ADR 0005](docs/ADR/0005-migracao-backend-dotnet-para-python-fastapi.md)). Convenções de código e o padrão de "vertical slice" para novos módulos estão documentados em [backend/README.md](backend/README.md).
 
 ```
 backend/
-  src/
-    BMPCommerce.API/             API REST — controllers, middlewares, Program.cs (JWT/Swagger/CORS)
-    BMPCommerce.Application/     Casos de uso (Operations/), contratos (Common/)
-    BMPCommerce.Domain/          Entidades, enums, value objects, exceções e regras de negócio puras
-    BMPCommerce.Infrastructure/  EF Core, migrations, seed, JWT/BCrypt, repositórios, tenancy
-  tests/
-    BMPCommerce.UnitTests/
-    BMPCommerce.IntegrationTests/
+  app/
+    api/routers/    Rotas REST — auth, produtos, clientes, vendas, dashboard
+    services/       Casos de uso (equivalente a Application/Operations)
+    domain/         Entidades, enums, value objects, exceções e regras de negócio puras
+    repositories/   Ponte entre app/models (SQLAlchemy) e app/domain (puro)
+    models/         Mapeamento SQLAlchemy (persistência)
+    schemas/        Contratos HTTP (Pydantic v2, alias camelCase)
+    core/           Config, JWT/BCrypt, exceções centrais
+    dependencies/   Sessão de DB por requisição, extração do usuário JWT
+    middleware/     Exception handling centralizado
+    main.py         Wiring (CORS, lifespan, routers) — equivalente a Program.cs
+  alembic/          Migrations
+  tests/            pytest — domínio (unitário) + integração (API + SQL Server real)
 
 frontend/
   bmp-commerce-web/              SPA React + TS + Vite (organizada por features) — ver README próprio
@@ -47,6 +52,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Estrutura do monorepo](docs/05-estrutura-monorepo.md)
 - [Sprint 1.5 — Refinamento do MVP](docs/06-sprint-1.5-refinamento-mvp.md) (changelog + decisões + screenshots)
 - [Sprint 2 — Fluxo comercial completo](docs/07-sprint-2-fluxo-comercial-completo.md) (Clientes, Vendas, Estoque, Dashboard)
+- [Migração do backend: .NET → Python/FastAPI](docs/08-migracao-backend-python-fastapi.md)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)
@@ -55,26 +61,30 @@ docs/                            Documentação de produto, domínio e arquitetu
 
 ### Pré-requisitos
 
-- [.NET SDK 9](https://dotnet.microsoft.com/download)
+- [Python 3.13](https://www.python.org/downloads/)
 - [Node.js 20+](https://nodejs.org/)
-- SQL Server acessível em `localhost` (instância local, LocalDB ou container) com autenticação do Windows, **ou** ajuste a connection string conforme sua instalação
+- SQL Server acessível em `localhost` (instância local ou container), com o "ODBC Driver 17" ou "18 for SQL Server" instalado — **ou** ajuste `DATABASE_URL` conforme sua instalação (ver `backend/app/core/config.py`)
 
 ### Backend
 
 ```bash
-cd backend/src/BMPCommerce.API
-cp appsettings.Development.json.example appsettings.Development.json
-# edite a Jwt:Key no arquivo copiado (qualquer string com 32+ caracteres serve para dev local)
+cd backend
+python -m venv .venv
+.venv\Scripts\activate        # Windows; source .venv/bin/activate no Linux/macOS
+pip install -r requirements.txt
 
-dotnet run --launch-profile http
+alembic upgrade head          # cria o schema no banco BMPCommerceDb (só na primeira vez / após novas migrations)
+
+uvicorn app.main:app --reload --port 5050
 ```
 
-Ao subir em ambiente de desenvolvimento, a API automaticamente:
-1. Aplica as migrations do EF Core (cria o banco `BMPCommerceDb` se não existir)
-2. Executa o seed inicial (tenant de demonstração + usuário administrador)
+Ao subir em ambiente de desenvolvimento (`ENVIRONMENT=Development`, o padrão), a API
+executa automaticamente o seed inicial (tenant de demonstração + usuário administrador +
+produtos/clientes/vendas de exemplo) — idempotente, não duplica dados em re-execuções.
+As migrations não rodam automaticamente no boot; use `alembic upgrade head`.
 
 - API: http://localhost:5050
-- Swagger: http://localhost:5050/swagger
+- Swagger/OpenAPI: http://localhost:5050/docs
 
 ### Frontend
 
@@ -105,3 +115,6 @@ docker compose up
 ```
 
 Sobe SQL Server + API + frontend em containers (configuração de portas em `infra/.env`).
+As migrations não rodam automaticamente no container (mesma característica preservada
+do backend original) — rode `alembic upgrade head` manualmente contra o banco do
+container antes do primeiro uso.

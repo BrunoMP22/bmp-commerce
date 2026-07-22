@@ -4,6 +4,14 @@
 **Status:** Para validação (estrutura de diretórios — sem código)
 **Versão:** 1.0
 
+> **Nota (2026-07-22):** a árvore de diretórios abaixo reflete a estrutura original em
+> .NET (Sprint 0). O backend foi migrado para Python/FastAPI — a estrutura atual de
+> `backend/` está descrita no [README raiz](../README.md#arquitetura) e em
+> [backend/README.md](../backend/README.md); o mapeamento completo está em
+> [ADR 0005](ADR/0005-migracao-backend-dotnet-para-python-fastapi.md) e
+> [docs/08](08-migracao-backend-python-fastapi.md). `frontend/`, `docs/` e `infra/`
+> continuam como descrito aqui. Preservado abaixo como registro histórico.
+
 ---
 
 ## 1. Ajustes incorporados

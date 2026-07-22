@@ -19,9 +19,12 @@ services:
       context: ..
       dockerfile: infra/backend.Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__DefaultConnection: ${API_CONNECTION_STRING}
+      ENVIRONMENT: Production
+      DATABASE_URL: "mssql+pyodbc://sa:${SQLSERVER_SA_PASSWORD}@sqlserver:1433/BMPCommerceDb?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+      JWT_KEY: ${JWT_KEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES}
     ports:
       - "${API_PORT}:8080"
     depends_on:
