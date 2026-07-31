@@ -13,9 +13,12 @@ from __future__ import annotations
 import os
 from collections.abc import Iterator
 
-os.environ["DATABASE_URL"] = (
+# `setdefault`: em máquinas sem a instância padrão "localhost" (ex: só LocalDB), rode a
+# suíte exportando DATABASE_URL apontando o banco de teste para a sua instância.
+os.environ.setdefault(
+    "DATABASE_URL",
     "mssql+pyodbc://localhost/BMPCommerceTestDb"
-    "?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes"
+    "?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes",
 )
 
 import pytest

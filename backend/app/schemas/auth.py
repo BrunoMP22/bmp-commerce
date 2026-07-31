@@ -24,3 +24,9 @@ class AuthenticatedUserResult(CamelModel):
 class LoginResult(CamelModel):
     token: str
     user: AuthenticatedUserResult
+
+
+class AlterarSenhaRequest(CamelModel):
+    senha_atual: str
+    # Tamanho mínimo é validado no AuthService (mensagem pt-BR, padrão do projeto).
+    nova_senha: str

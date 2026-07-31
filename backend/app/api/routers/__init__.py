@@ -3,6 +3,7 @@ from app.api.routers.clientes import router as clientes_router
 from app.api.routers.dashboard import router as dashboard_router
 from app.api.routers.insights import router as insights_router
 from app.api.routers.produtos import router as produtos_router
+from app.api.routers.sistema import router as sistema_router
 from app.api.routers.vendas import router as vendas_router
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "vendas_router",
     "dashboard_router",
     "insights_router",
+    "sistema_router",
 ]

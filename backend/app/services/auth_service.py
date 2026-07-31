@@ -8,19 +8,20 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundException
-from app.core.security import generate_token, verify_password
+from app.core.security import generate_token, hash_password, verify_password
 from app.domain.common import Result
 from app.domain.tenant import Tenant
 from app.domain.usuario import Usuario
 from app.repositories.tenant_repository import TenantRepository
 from app.repositories.usuario_repository import UsuarioRepository
-from app.schemas.auth import AuthenticatedUserResult, LoginRequest, LoginResult
+from app.schemas.auth import AlterarSenhaRequest, AuthenticatedUserResult, LoginRequest, LoginResult
 
 logger = logging.getLogger(__name__)
 
 
 class AuthService:
     def __init__(self, session: Session) -> None:
+        self._session = session
         self._usuarios = UsuarioRepository(session)
         self._tenants = TenantRepository(session)
 
@@ -56,6 +57,30 @@ class AuthService:
         logger.info("Login bem-sucedido para o usuário %s.", usuario.id)
 
         return Result.success(LoginResult(token=token, user=user))
+
+    def alterar_senha(self, user_id: UUID, request: AlterarSenhaRequest) -> Result[None]:
+        """Troca a senha do próprio usuário autenticado. Exige a senha atual — um token
+        vazado sozinho não é suficiente para tomar a conta."""
+        usuario = self._usuarios.get_by_id(user_id)
+        if usuario is None:
+            raise NotFoundException("Usuário não encontrado.")
+
+        if len(request.nova_senha) < 8:
+            return Result.failure("A nova senha deve ter pelo menos 8 caracteres.")
+
+        if not verify_password(request.senha_atual, usuario.password_hash):
+            logger.warning("Alteração de senha recusada para o usuário %s: senha atual incorreta.", usuario.id)
+            return Result.failure("Senha atual incorreta.")
+
+        if request.senha_atual == request.nova_senha:
+            return Result.failure("A nova senha deve ser diferente da senha atual.")
+
+        usuario.change_password(hash_password(request.nova_senha))
+        self._usuarios.update(usuario)
+        self._session.commit()
+
+        logger.info("Senha alterada com sucesso para o usuário %s.", usuario.id)
+        return Result.success()
 
     def obter_usuario_atual(self, user_id: UUID) -> AuthenticatedUserResult:
         usuario = self._usuarios.get_by_id(user_id)

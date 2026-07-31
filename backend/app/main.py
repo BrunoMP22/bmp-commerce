@@ -14,6 +14,7 @@ from app.api.routers import (
     dashboard_router,
     insights_router,
     produtos_router,
+    sistema_router,
     vendas_router,
 )
 from app.core.config import settings
@@ -60,3 +61,4 @@ app.include_router(clientes_router)
 app.include_router(vendas_router)
 app.include_router(dashboard_router)
 app.include_router(insights_router)
+app.include_router(sistema_router)

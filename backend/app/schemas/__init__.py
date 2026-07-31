@@ -1,7 +1,7 @@
 """Schemas Pydantic (contrato HTTP camelCase) — equivalente aos records DTO de
 Application/Operations/*/**Dtos.cs do backend original."""
 
-from app.schemas.auth import AuthenticatedUserResult, LoginRequest, LoginResult
+from app.schemas.auth import AlterarSenhaRequest, AuthenticatedUserResult, LoginRequest, LoginResult
 from app.schemas.cliente import AtualizarClienteRequest, ClienteDto, CriarClienteRequest
 from app.schemas.dashboard import DashboardDto, VendaPorDiaDto
 from app.schemas.insight import InsightDto, InsightsDto, ResumoInsightsDto
@@ -12,6 +12,7 @@ __all__ = [
     "LoginRequest",
     "AuthenticatedUserResult",
     "LoginResult",
+    "AlterarSenhaRequest",
     "ProdutoDto",
     "CriarProdutoRequest",
     "AtualizarProdutoRequest",

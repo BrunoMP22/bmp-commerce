@@ -57,3 +57,71 @@ def test_rota_protegida_sem_token_retorna_401(client: TestClient):
     response = client.get("/api/produtos")
 
     assert response.status_code == 401
+
+
+def test_alterar_senha_com_senha_atual_correta_retorna_204_e_troca_a_senha(
+    client: TestClient, auth_headers: dict[str, str]
+):
+    response = client.put(
+        "/api/auth/senha",
+        headers=auth_headers,
+        json={"senhaAtual": "Senha@123", "novaSenha": "NovaSenha@456"},
+    )
+
+    assert response.status_code == 204
+
+    login_com_nova = client.post(
+        "/api/auth/login",
+        json={"email": "admin.teste@bmpcommerce.com", "password": "NovaSenha@456"},
+    )
+    assert login_com_nova.status_code == 200
+
+    login_com_antiga = client.post(
+        "/api/auth/login",
+        json={"email": "admin.teste@bmpcommerce.com", "password": "Senha@123"},
+    )
+    assert login_com_antiga.status_code == 401
+
+
+def test_alterar_senha_com_senha_atual_errada_retorna_400(
+    client: TestClient, auth_headers: dict[str, str]
+):
+    response = client.put(
+        "/api/auth/senha",
+        headers=auth_headers,
+        json={"senhaAtual": "errada", "novaSenha": "NovaSenha@456"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"message": "Senha atual incorreta."}
+
+
+def test_alterar_senha_igual_a_atual_retorna_400(client: TestClient, auth_headers: dict[str, str]):
+    response = client.put(
+        "/api/auth/senha",
+        headers=auth_headers,
+        json={"senhaAtual": "Senha@123", "novaSenha": "Senha@123"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"message": "A nova senha deve ser diferente da senha atual."}
+
+
+def test_alterar_senha_curta_demais_retorna_400(client: TestClient, auth_headers: dict[str, str]):
+    response = client.put(
+        "/api/auth/senha",
+        headers=auth_headers,
+        json={"senhaAtual": "Senha@123", "novaSenha": "curta"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"message": "A nova senha deve ter pelo menos 8 caracteres."}
+
+
+def test_alterar_senha_sem_token_retorna_401(client: TestClient):
+    response = client.put(
+        "/api/auth/senha",
+        json={"senhaAtual": "Senha@123", "novaSenha": "NovaSenha@456"},
+    )
+
+    assert response.status_code == 401

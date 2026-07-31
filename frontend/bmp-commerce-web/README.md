@@ -41,9 +41,8 @@ src/
     ui/             Primitivas de UI (button, input, label, card, table, dialog, alert-dialog, badge, textarea, select, checkbox)
     layout/         Sidebar, Header, Breadcrumb, StatCard, ThemeToggle, ProtectedRoute
   features/         Uma pasta por área de negócio (auth, dashboard, produtos, clientes, vendas, insights, configuracoes, perfil)
-  hooks/            Hooks reutilizáveis (ex: use-theme)
   layouts/          Shells de página (AppLayout: sidebar + header + conteúdo)
-  lib/              Utilitários, contexto de autenticação, storage local, tratamento de erro de API
+  lib/              Utilitários, contextos de autenticação e tema, storage local, tratamento de erro de API
   types/            Tipos TypeScript compartilhados
 ```
 

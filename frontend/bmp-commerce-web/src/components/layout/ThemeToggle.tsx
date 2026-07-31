@@ -1,5 +1,5 @@
 import { Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/lib/theme-context'
 import { Button } from '@/components/ui/button'
 import type { VariantProps } from 'class-variance-authority'
 import type { buttonVariants } from '@/components/ui/button'

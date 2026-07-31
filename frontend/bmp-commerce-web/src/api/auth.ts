@@ -17,3 +17,15 @@ export function login(payload: LoginPayload) {
 export function fetchCurrentUser() {
   return apiRequest<AuthenticatedUser>('/api/auth/me')
 }
+
+export interface AlterarSenhaPayload {
+  senhaAtual: string
+  novaSenha: string
+}
+
+export function alterarSenha(payload: AlterarSenhaPayload) {
+  return apiRequest<void>('/api/auth/senha', {
+    method: 'PUT',
+    body: payload,
+  })
+}

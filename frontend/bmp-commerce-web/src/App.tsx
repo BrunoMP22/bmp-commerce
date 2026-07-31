@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/lib/theme-context'
 import { ProtectedRoute, PublicOnlyRoute } from '@/components/layout/ProtectedRoute'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginPage } from '@/features/auth/LoginPage'

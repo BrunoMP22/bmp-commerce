@@ -48,6 +48,17 @@ class UsuarioRepository:
         model = self._session.query(UsuarioModel).filter(UsuarioModel.email == parsed.value).one_or_none()
         return _to_domain(model) if model is not None else None
 
+    def update(self, usuario: Usuario) -> None:
+        """Sincroniza de volta no model rastreado os campos que o domínio pode mutar
+        (senha e ativação) — mesmo padrão do ProdutoRepository.update()."""
+        model = self._session.get(UsuarioModel, usuario.id)
+        if model is None:
+            raise DomainException("Usuário não encontrado.")
+
+        model.password_hash = usuario.password_hash
+        model.is_active = usuario.is_active
+        model.updated_at = to_naive_utc(usuario.updated_at)
+
     def add(self, usuario: Usuario) -> None:
         model = UsuarioModel(
             id=usuario.id,
