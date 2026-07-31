@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
 from app.schemas.common import CamelModel
@@ -19,6 +20,8 @@ class AuthenticatedUserResult(CamelModel):
     role: str
     tenant_id: UUID | None
     tenant_name: str | None
+    avatar: str | None
+    criado_em: datetime
 
 
 class LoginResult(CamelModel):
@@ -30,3 +33,12 @@ class AlterarSenhaRequest(CamelModel):
     senha_atual: str
     # Tamanho mínimo é validado no AuthService (mensagem pt-BR, padrão do projeto).
     nova_senha: str
+
+
+class AtualizarPerfilRequest(CamelModel):
+    name: str
+
+
+class AtualizarAvatarRequest(CamelModel):
+    # Data URL de imagem pequena (o cliente redimensiona antes de enviar).
+    imagem: str

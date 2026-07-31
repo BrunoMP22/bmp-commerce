@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -16,6 +16,8 @@ class UsuarioModel(Base):
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     role: Mapped[str] = mapped_column(String(50), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    # Foto de perfil como data URL (imagem pequena, redimensionada no cliente).
+    avatar: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Sem `ondelete` explícito: SQL Server não aceita a palavra-chave RESTRICT em DDL
     # (só CASCADE/SET NULL/SET DEFAULT/NO ACTION) — o padrão do FK sem cláusula já É
     # "NO ACTION", que bloqueia o DELETE do tenant se houver usuários vinculados

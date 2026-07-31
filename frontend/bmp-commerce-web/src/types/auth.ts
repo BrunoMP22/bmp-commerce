@@ -5,6 +5,8 @@ export interface AuthenticatedUser {
   role: string
   tenantId: string | null
   tenantName: string | null
+  avatar: string | null
+  criadoEm: string
 }
 
 export interface LoginResponse {

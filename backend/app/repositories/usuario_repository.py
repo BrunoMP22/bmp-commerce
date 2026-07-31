@@ -24,6 +24,7 @@ def _to_domain(model: UsuarioModel) -> Usuario:
         role=UserRole(model.role),
         tenant_id=model.tenant_id,
         is_active=model.is_active,
+        avatar=model.avatar,
         created_at=to_aware_utc(model.created_at),
         updated_at=to_aware_utc(model.updated_at),
     )
@@ -50,11 +51,13 @@ class UsuarioRepository:
 
     def update(self, usuario: Usuario) -> None:
         """Sincroniza de volta no model rastreado os campos que o domínio pode mutar
-        (senha e ativação) — mesmo padrão do ProdutoRepository.update()."""
+        (nome, avatar, senha e ativação) — mesmo padrão do ProdutoRepository.update()."""
         model = self._session.get(UsuarioModel, usuario.id)
         if model is None:
             raise DomainException("Usuário não encontrado.")
 
+        model.name = usuario.name
+        model.avatar = usuario.avatar
         model.password_hash = usuario.password_hash
         model.is_active = usuario.is_active
         model.updated_at = to_naive_utc(usuario.updated_at)

@@ -1,17 +1,10 @@
 import { Menu } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-}
+import { UserAvatar } from '@/components/layout/UserAvatar'
 
 interface HeaderProps {
   onOpenMobileMenu: () => void
@@ -40,15 +33,17 @@ export function Header({ onOpenMobileMenu }: HeaderProps) {
         <ThemeToggle />
 
         {user && (
-          <div className="flex items-center gap-2.5 border-l border-border pl-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              {getInitials(user.name)}
-            </div>
+          <Link
+            to="/perfil"
+            className="flex items-center gap-2.5 rounded-lg border-l border-border py-1 pl-3 pr-1 transition-colors hover:bg-muted/60"
+            title="Ver perfil"
+          >
+            <UserAvatar name={user.name} avatar={user.avatar} className="size-8 text-xs" />
             <div className="hidden leading-tight sm:block">
               <p className="text-sm font-medium">{user.name}</p>
               <p className="text-xs text-muted-foreground">{user.role}</p>
             </div>
-          </div>
+          </Link>
         )}
       </div>
     </header>

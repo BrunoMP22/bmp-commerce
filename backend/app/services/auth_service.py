@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import logging
 from uuid import UUID
 
@@ -14,9 +16,20 @@ from app.domain.tenant import Tenant
 from app.domain.usuario import Usuario
 from app.repositories.tenant_repository import TenantRepository
 from app.repositories.usuario_repository import UsuarioRepository
-from app.schemas.auth import AlterarSenhaRequest, AuthenticatedUserResult, LoginRequest, LoginResult
+from app.schemas.auth import (
+    AlterarSenhaRequest,
+    AtualizarAvatarRequest,
+    AtualizarPerfilRequest,
+    AuthenticatedUserResult,
+    LoginRequest,
+    LoginResult,
+)
 
 logger = logging.getLogger(__name__)
+
+# Avatar chega como data URL de imagem já redimensionada no cliente.
+_PREFIXOS_AVATAR = ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+_TAMANHO_MAXIMO_AVATAR_BYTES = 300 * 1024
 
 
 class AuthService:
@@ -91,6 +104,56 @@ class AuthService:
 
         return self._to_result(usuario, tenant)
 
+    def atualizar_perfil(self, user_id: UUID, request: AtualizarPerfilRequest) -> AuthenticatedUserResult:
+        usuario = self._buscar_ou_404(user_id)
+
+        usuario.alterar_nome(request.name)
+        self._usuarios.update(usuario)
+        self._session.commit()
+
+        return self._resultado_atual(usuario)
+
+    def definir_avatar(self, user_id: UUID, request: AtualizarAvatarRequest) -> Result[AuthenticatedUserResult]:
+        usuario = self._buscar_ou_404(user_id)
+
+        imagem = request.imagem.strip()
+        prefixo = next((p for p in _PREFIXOS_AVATAR if imagem.startswith(p)), None)
+        if prefixo is None:
+            return Result.failure("Formato de imagem inválido. Use JPEG, PNG ou WebP.")
+
+        try:
+            conteudo = base64.b64decode(imagem[len(prefixo) :], validate=True)
+        except (binascii.Error, ValueError):
+            return Result.failure("Imagem corrompida ou codificação inválida.")
+
+        if len(conteudo) > _TAMANHO_MAXIMO_AVATAR_BYTES:
+            return Result.failure("Imagem muito grande. O limite é 300 KB após o redimensionamento.")
+
+        usuario.definir_avatar(imagem)
+        self._usuarios.update(usuario)
+        self._session.commit()
+
+        return Result.success(self._resultado_atual(usuario))
+
+    def remover_avatar(self, user_id: UUID) -> AuthenticatedUserResult:
+        usuario = self._buscar_ou_404(user_id)
+
+        usuario.remover_avatar()
+        self._usuarios.update(usuario)
+        self._session.commit()
+
+        return self._resultado_atual(usuario)
+
+    def _buscar_ou_404(self, user_id: UUID) -> Usuario:
+        usuario = self._usuarios.get_by_id(user_id)
+        if usuario is None:
+            raise NotFoundException("Usuário não encontrado.")
+        return usuario
+
+    def _resultado_atual(self, usuario: Usuario) -> AuthenticatedUserResult:
+        tenant = self._tenants.get_by_id(usuario.tenant_id) if usuario.tenant_id is not None else None
+        return self._to_result(usuario, tenant)
+
     @staticmethod
     def _to_result(usuario: Usuario, tenant: Tenant | None) -> AuthenticatedUserResult:
         return AuthenticatedUserResult(
@@ -100,4 +163,6 @@ class AuthService:
             role=usuario.role.value,
             tenant_id=usuario.tenant_id,
             tenant_name=tenant.name if tenant is not None else None,
+            avatar=usuario.avatar,
+            criado_em=usuario.created_at,
         )

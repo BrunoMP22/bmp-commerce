@@ -29,3 +29,23 @@ export function alterarSenha(payload: AlterarSenhaPayload) {
     body: payload,
   })
 }
+
+export function atualizarPerfil(payload: { name: string }) {
+  return apiRequest<AuthenticatedUser>('/api/auth/perfil', {
+    method: 'PUT',
+    body: payload,
+  })
+}
+
+export function atualizarAvatar(payload: { imagem: string }) {
+  return apiRequest<AuthenticatedUser>('/api/auth/avatar', {
+    method: 'PUT',
+    body: payload,
+  })
+}
+
+export function removerAvatar() {
+  return apiRequest<AuthenticatedUser>('/api/auth/avatar', {
+    method: 'DELETE',
+  })
+}

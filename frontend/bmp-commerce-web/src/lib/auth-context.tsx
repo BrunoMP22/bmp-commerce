@@ -8,6 +8,8 @@ interface AuthContextValue {
   isAuthenticated: boolean
   signIn: (auth: StoredAuth) => void
   signOut: () => void
+  /** Atualiza o usuário mantido em sessão (ex: após editar o perfil), preservando o token. */
+  updateUser: (user: AuthenticatedUser) => void
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
@@ -25,6 +27,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuth(null)
   }, [])
 
+  const updateUser = React.useCallback((user: AuthenticatedUser) => {
+    setAuth((current) => {
+      if (!current) {
+        return current
+      }
+      const next = { ...current, user }
+      writeStoredAuth(next)
+      return next
+    })
+  }, [])
+
   const value = React.useMemo<AuthContextValue>(
     () => ({
       user: auth?.user ?? null,
@@ -32,8 +45,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: auth !== null,
       signIn,
       signOut,
+      updateUser,
     }),
-    [auth, signIn, signOut],
+    [auth, signIn, signOut, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

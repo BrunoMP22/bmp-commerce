@@ -47,6 +47,25 @@ class Usuario(Entity):
         self.role = role
         self.tenant_id = tenant_id
         self.is_active = True
+        self.avatar: str | None = None
+
+    def alterar_nome(self, name: str) -> None:
+        if not name or not name.strip():
+            raise DomainException("Nome do usuário é obrigatório.")
+
+        self.name = name.strip()
+        self.mark_as_updated()
+
+    def definir_avatar(self, avatar: str) -> None:
+        if not avatar or not avatar.strip():
+            raise DomainException("Imagem do avatar é obrigatória.")
+
+        self.avatar = avatar
+        self.mark_as_updated()
+
+    def remover_avatar(self) -> None:
+        self.avatar = None
+        self.mark_as_updated()
 
     def activate(self) -> None:
         self.is_active = True

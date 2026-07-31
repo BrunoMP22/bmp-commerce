@@ -2,7 +2,7 @@
 
 Sistema de e-commerce/gestão comercial multi-tenant, com backend em Python/FastAPI (Clean Architecture) e frontend em React + TypeScript.
 
-## Status atual: Sprint 4 — Configurações
+## Status atual: Sprint 5 — Perfil
 
 O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e clientes → **registro de venda com baixa automática de estoque** → dashboard com indicadores → **aba Insights explicando o negócio em frases**, com ação sugerida em cada uma.
 
@@ -13,8 +13,9 @@ O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e cl
 - ✅ **Dashboard executivo**: KPIs de 30 dias com variação vs período anterior (mesma régua dos Insights) e sparkline, gráfico de receita de 30 dias com crosshair, receita por categoria (paleta validada para daltonismo nos dois temas), top produtos, últimas vendas e estoque em alerta — tudo agregado no backend em um único endpoint
 - ✅ **Insights**: motor de regras (ADR 0004) com 12 insights — faturamento/margem/ticket em movimento, previsão de ruptura, produtos encalhados, capital parado, clientes sumidos, concentração de receita, campeão de lucro, melhor dia da semana, vendas de balcão — cada um com severidade (Alerta/Oportunidade/Info) e **ação sugerida**; insights financeiros restritos a Admin no back-end
 - ✅ **Configurações**: tema claro/escuro/**sistema** (acompanha o dispositivo em tempo real), alteração de senha exigindo a senha atual (bloqueios no back-end, mensagens pt-BR), idioma/região do MVP e card "Sobre" com versão/ambiente da API
+- ✅ **Perfil**: foto de perfil com redimensionamento no navegador (256×256 antes do upload, validações de formato/tamanho no back-end), edição de nome, papel/vínculo/membro desde — avatar refletido no header; último placeholder do app eliminado
 - ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + ~70 vendas espalhadas por 90 dias com tendência de crescimento, criados automaticamente em banco vazio
-- ⏳ **Próximo passo**: perfil do usuário/empresa e dashboard por papel (Funcionário sem indicadores financeiros)
+- ⏳ **Próximo passo**: perfil da empresa por tenant (logo) e dashboard por papel (Funcionário sem indicadores financeiros)
 
 Detalhes em [docs/09-motor-de-insights.md](docs/09-motor-de-insights.md) e [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-sprint-2-fluxo-comercial-completo.md). O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
 
@@ -59,6 +60,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Sprint 3 — Motor de Insights](docs/09-motor-de-insights.md) (regras, decisões e como adicionar um insight)
 - [Sprint 4 — Configurações](docs/10-configuracoes.md) (tema, alteração de senha, sobre o sistema)
 - [Repaginada de UI — Dashboard executivo](docs/11-dashboard-executivo.md) (KPIs de janela, gráficos, paleta validada)
+- [Sprint 5 — Perfil](docs/12-perfil.md) (foto de perfil, edição de nome, conta e acesso)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)
