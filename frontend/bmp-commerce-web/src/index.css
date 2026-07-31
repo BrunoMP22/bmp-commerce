@@ -17,6 +17,12 @@
   --ring: #2563eb;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
+  /* Paleta categórica dos gráficos — validada (CVD + contraste) sobre --card claro.
+     Ordem fixa; nunca ciclar além dos 4 slots (dobrar em "Outras"). */
+  --chart-1: #2563eb;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
 }
 
 .dark {
@@ -34,6 +40,11 @@
   --ring: #3b82f6;
   --destructive: #f87171;
   --destructive-foreground: #1c0a0a;
+  /* Mesmos 4 matizes re-escalonados para a superfície escura (--card), validados. */
+  --chart-1: #3b82f6;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
 }
 
 @theme inline {

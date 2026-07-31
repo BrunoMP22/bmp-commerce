@@ -10,7 +10,7 @@ O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e cl
 - ✅ **Clientes**: CRUD completo com indicadores (total, ativos, inativos, novos no mês), CPF/CNPJ validado e formatado
 - ✅ **Vendas**: fluxo de venda estilo PDV (`/vendas/nova`) — cliente opcional (balcão), busca de produtos, carrinho com quantidades, resumo em tempo real; listagem com filtros por período/cliente/status, ordenação, detalhes e **cancelamento com estorno de estoque**
 - ✅ **Estoque**: baixa automática na venda, nunca negativo (venda bloqueada), concorrência otimista (409 em conflito), preço/custo **congelados** no item para margem histórica
-- ✅ **Dashboard**: receita total, vendas, ticket médio, valor do estoque, clientes, produtos, alertas de estoque + gráfico de vendas dos últimos 14 dias (Recharts)
+- ✅ **Dashboard executivo**: KPIs de 30 dias com variação vs período anterior (mesma régua dos Insights) e sparkline, gráfico de receita de 30 dias com crosshair, receita por categoria (paleta validada para daltonismo nos dois temas), top produtos, últimas vendas e estoque em alerta — tudo agregado no backend em um único endpoint
 - ✅ **Insights**: motor de regras (ADR 0004) com 12 insights — faturamento/margem/ticket em movimento, previsão de ruptura, produtos encalhados, capital parado, clientes sumidos, concentração de receita, campeão de lucro, melhor dia da semana, vendas de balcão — cada um com severidade (Alerta/Oportunidade/Info) e **ação sugerida**; insights financeiros restritos a Admin no back-end
 - ✅ **Configurações**: tema claro/escuro/**sistema** (acompanha o dispositivo em tempo real), alteração de senha exigindo a senha atual (bloqueios no back-end, mensagens pt-BR), idioma/região do MVP e card "Sobre" com versão/ambiente da API
 - ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + ~70 vendas espalhadas por 90 dias com tendência de crescimento, criados automaticamente em banco vazio
@@ -58,6 +58,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Migração do backend: .NET → Python/FastAPI](docs/08-migracao-backend-python-fastapi.md)
 - [Sprint 3 — Motor de Insights](docs/09-motor-de-insights.md) (regras, decisões e como adicionar um insight)
 - [Sprint 4 — Configurações](docs/10-configuracoes.md) (tema, alteração de senha, sobre o sistema)
+- [Repaginada de UI — Dashboard executivo](docs/11-dashboard-executivo.md) (KPIs de janela, gráficos, paleta validada)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)
