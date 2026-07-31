@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   TrendingUp,
   Trophy,
+  Users,
   Wallet,
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -113,14 +114,20 @@ function KpiTile({ titulo, valor, icone: Icone, rodape, sparkline }: KpiTileProp
   )
 }
 
-function Sparkline({ dados }: { dados: Dashboard['vendasPorDia'] }) {
+function Sparkline({
+  dados,
+  metrica,
+}: {
+  dados: Dashboard['vendasPorDia']
+  metrica: 'total' | 'quantidade'
+}) {
   return (
     <div className="h-9 w-24 shrink-0" aria-hidden="true">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={dados} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
           <Area
             type="monotone"
-            dataKey="total"
+            dataKey={metrica}
             stroke="var(--chart-1)"
             strokeWidth={1.5}
             fill="var(--chart-1)"
@@ -134,17 +141,24 @@ function Sparkline({ dados }: { dados: Dashboard['vendasPorDia'] }) {
   )
 }
 
-// ---------------------------------------------------- gráfico de receita 30d
+// ------------------------------------------- gráfico de 30 dias (por métrica)
 
-function GraficoReceita({ dados }: { dados: Dashboard['vendasPorDia'] }) {
+function GraficoVendas({
+  dados,
+  financeiro,
+}: {
+  dados: Dashboard['vendasPorDia']
+  financeiro: boolean
+}) {
   const chartData = dados.map((dia) => ({ ...dia, rotulo: formatDiaCurto(dia.data) }))
+  const metrica = financeiro ? 'total' : 'quantidade'
 
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
           <defs>
-            <linearGradient id="receita-fill" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="serie-fill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.18} />
               <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
             </linearGradient>
@@ -162,7 +176,8 @@ function GraficoReceita({ dados }: { dados: Dashboard['vendasPorDia'] }) {
             tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={formatCompacto}
+            tickFormatter={financeiro ? formatCompacto : String}
+            allowDecimals={false}
             width={44}
           />
           <Tooltip
@@ -177,21 +192,19 @@ function GraficoReceita({ dados }: { dados: Dashboard['vendasPorDia'] }) {
             labelStyle={{ color: 'var(--muted-foreground)', marginBottom: 4 }}
             formatter={(value, _name, item) => {
               const quantidade = (item?.payload as { quantidade?: number } | undefined)?.quantidade ?? 0
-              return [
-                `${formatCurrency(Number(value))} · ${quantidade} ${quantidade === 1 ? 'venda' : 'vendas'}`,
-                null,
-              ]
+              const vendas = `${quantidade} ${quantidade === 1 ? 'venda' : 'vendas'}`
+              return [financeiro ? `${formatCurrency(Number(value))} · ${vendas}` : vendas, null]
             }}
             labelFormatter={(label) => `Dia ${label}`}
           />
           <Area
             type="monotone"
-            dataKey="total"
+            dataKey={metrica}
             stroke="var(--chart-1)"
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
-            fill="url(#receita-fill)"
+            fill="url(#serie-fill)"
             activeDot={{ r: 4.5, strokeWidth: 2, stroke: 'var(--card)', fill: 'var(--chart-1)' }}
             dot={false}
           />
@@ -256,7 +269,11 @@ function TopProdutos({ produtos }: { produtos: Dashboard['topProdutos'] }) {
     return <p className="py-8 text-center text-sm text-muted-foreground">Sem vendas nos últimos 30 dias.</p>
   }
 
-  const maiorReceita = produtos[0].receita
+  // Admin ranqueia por receita; Funcionário (receita null) por unidades vendidas.
+  const financeiro = produtos[0].receita !== null
+  const magnitude = (produto: Dashboard['topProdutos'][number]) =>
+    financeiro ? (produto.receita ?? 0) : produto.quantidade
+  const maior = Math.max(magnitude(produtos[0]), 1)
 
   return (
     <ul className="space-y-3.5">
@@ -268,19 +285,21 @@ function TopProdutos({ produtos }: { produtos: Dashboard['topProdutos'] }) {
               <span className="truncate font-medium">{produto.nome}</span>
             </span>
             <span className="shrink-0 text-sm font-medium tabular-nums">
-              {formatCurrency(produto.receita)}
+              {financeiro ? formatCurrency(produto.receita ?? 0) : `${produto.quantidade} un`}
             </span>
           </div>
           <div className="ml-6 flex items-center gap-2">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-primary"
-                style={{ width: `${Math.max((produto.receita / maiorReceita) * 100, 4)}%` }}
+                style={{ width: `${Math.max((magnitude(produto) / maior) * 100, 4)}%` }}
               />
             </div>
-            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-              {produto.quantidade} un
-            </span>
+            {financeiro && (
+              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                {produto.quantidade} un
+              </span>
+            )}
           </div>
         </li>
       ))}
@@ -464,43 +483,114 @@ export function DashboardPage() {
       {dashboard && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiTile
-              titulo="Receita (30 dias)"
-              valor={formatCurrency(dashboard.receita30Dias.atual)}
-              icone={Wallet}
-              rodape={<Delta kpi={dashboard.receita30Dias} />}
-              sparkline={<Sparkline dados={dashboard.vendasPorDia} />}
-            />
-            <KpiTile
-              titulo="Vendas (30 dias)"
-              valor={String(dashboard.vendas30Dias.atual)}
-              icone={ShoppingCart}
-              rodape={<Delta kpi={dashboard.vendas30Dias} />}
-            />
-            <KpiTile
-              titulo="Ticket médio (30 dias)"
-              valor={formatCurrency(dashboard.ticketMedio30Dias.atual)}
-              icone={Receipt}
-              rodape={<Delta kpi={dashboard.ticketMedio30Dias} />}
-            />
-            <KpiTile
-              titulo="Valor em estoque"
-              valor={formatCurrency(dashboard.valorEstoque)}
-              icone={Package}
-              rodape={<p className="text-xs text-muted-foreground">a preço de custo</p>}
-            />
+            {dashboard.receita30Dias !== null ? (
+              <KpiTile
+                titulo="Receita (30 dias)"
+                valor={formatCurrency(dashboard.receita30Dias.atual)}
+                icone={Wallet}
+                rodape={<Delta kpi={dashboard.receita30Dias} />}
+                sparkline={<Sparkline dados={dashboard.vendasPorDia} metrica="total" />}
+              />
+            ) : (
+              <KpiTile
+                titulo="Vendas (30 dias)"
+                valor={String(dashboard.vendas30Dias.atual)}
+                icone={ShoppingCart}
+                rodape={<Delta kpi={dashboard.vendas30Dias} />}
+                sparkline={<Sparkline dados={dashboard.vendasPorDia} metrica="quantidade" />}
+              />
+            )}
+            {dashboard.receita30Dias !== null && (
+              <KpiTile
+                titulo="Vendas (30 dias)"
+                valor={String(dashboard.vendas30Dias.atual)}
+                icone={ShoppingCart}
+                rodape={<Delta kpi={dashboard.vendas30Dias} />}
+              />
+            )}
+            {dashboard.ticketMedio30Dias !== null && (
+              <KpiTile
+                titulo="Ticket médio (30 dias)"
+                valor={formatCurrency(dashboard.ticketMedio30Dias.atual)}
+                icone={Receipt}
+                rodape={<Delta kpi={dashboard.ticketMedio30Dias} />}
+              />
+            )}
+            {dashboard.valorEstoque !== null ? (
+              <KpiTile
+                titulo="Valor em estoque"
+                valor={formatCurrency(dashboard.valorEstoque)}
+                icone={Package}
+                rodape={<p className="text-xs text-muted-foreground">a preço de custo</p>}
+              />
+            ) : (
+              <>
+                <KpiTile
+                  titulo="Clientes cadastrados"
+                  valor={String(dashboard.clientesCadastrados)}
+                  icone={Users}
+                  rodape={<p className="text-xs text-muted-foreground">base ativa da loja</p>}
+                />
+                <KpiTile
+                  titulo="Produtos cadastrados"
+                  valor={String(dashboard.produtosCadastrados)}
+                  icone={Package}
+                  rodape={<p className="text-xs text-muted-foreground">no catálogo</p>}
+                />
+                <KpiTile
+                  titulo="Estoque em alerta"
+                  valor={String(dashboard.produtosAbaixoMinimo + dashboard.produtosSemEstoque)}
+                  icone={PackageX}
+                  rodape={
+                    <p className="text-xs text-muted-foreground">
+                      {dashboard.produtosSemEstoque} sem estoque · {dashboard.produtosAbaixoMinimo} baixos
+                    </p>
+                  }
+                />
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <CardSecao titulo="Receita dos últimos 30 dias" icone={TrendingUp} className="lg:col-span-2">
-              <GraficoReceita dados={dashboard.vendasPorDia} />
+            <CardSecao
+              titulo={
+                dashboard.receita30Dias !== null
+                  ? 'Receita dos últimos 30 dias'
+                  : 'Vendas dos últimos 30 dias'
+              }
+              icone={TrendingUp}
+              className="lg:col-span-2"
+            >
+              <GraficoVendas dados={dashboard.vendasPorDia} financeiro={dashboard.receita30Dias !== null} />
             </CardSecao>
-            <CardSecao titulo="Receita por categoria" icone={Package}>
-              <ReceitaPorCategoria categorias={dashboard.receitaPorCategoria} />
-            </CardSecao>
+            {dashboard.receita30Dias !== null ? (
+              <CardSecao titulo="Receita por categoria" icone={Package}>
+                <ReceitaPorCategoria categorias={dashboard.receitaPorCategoria} />
+              </CardSecao>
+            ) : (
+              <CardSecao
+                titulo="Estoque em alerta"
+                icone={PackageX}
+                acao={
+                  <Button variant="ghost" size="sm" asChild className="text-xs text-muted-foreground">
+                    <Link to="/produtos">
+                      Ver produtos
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </Button>
+                }
+              >
+                <EstoqueEmAlerta produtos={dashboard.estoqueEmAlerta} />
+              </CardSecao>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div
+            className={cn(
+              'grid grid-cols-1 gap-4',
+              dashboard.receita30Dias !== null ? 'lg:grid-cols-3' : 'lg:grid-cols-2',
+            )}
+          >
             <CardSecao titulo="Top produtos (30 dias)" icone={Trophy}>
               <TopProdutos produtos={dashboard.topProdutos} />
             </CardSecao>
@@ -518,26 +608,29 @@ export function DashboardPage() {
             >
               <UltimasVendas vendas={dashboard.ultimasVendas} />
             </CardSecao>
-            <CardSecao
-              titulo="Estoque em alerta"
-              icone={PackageX}
-              acao={
-                <Button variant="ghost" size="sm" asChild className="text-xs text-muted-foreground">
-                  <Link to="/produtos">
-                    Ver produtos
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                </Button>
-              }
-            >
-              <EstoqueEmAlerta produtos={dashboard.estoqueEmAlerta} />
-            </CardSecao>
+            {dashboard.receita30Dias !== null && (
+              <CardSecao
+                titulo="Estoque em alerta"
+                icone={PackageX}
+                acao={
+                  <Button variant="ghost" size="sm" asChild className="text-xs text-muted-foreground">
+                    <Link to="/produtos">
+                      Ver produtos
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </Button>
+                }
+              >
+                <EstoqueEmAlerta produtos={dashboard.estoqueEmAlerta} />
+              </CardSecao>
+            )}
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
-            Histórico completo: {formatCurrency(dashboard.receitaTotal)} em {dashboard.quantidadeVendas}{' '}
-            {dashboard.quantidadeVendas === 1 ? 'venda' : 'vendas'} · {dashboard.clientesCadastrados}{' '}
-            clientes · {dashboard.produtosCadastrados} produtos cadastrados
+            Histórico completo:{' '}
+            {dashboard.receitaTotal !== null && <>{formatCurrency(dashboard.receitaTotal)} em </>}
+            {dashboard.quantidadeVendas} {dashboard.quantidadeVendas === 1 ? 'venda' : 'vendas'} ·{' '}
+            {dashboard.clientesCadastrados} clientes · {dashboard.produtosCadastrados} produtos cadastrados
           </p>
         </>
       )}

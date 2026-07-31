@@ -13,6 +13,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.domain.enums import UserRole
 from app.domain.produto import Produto
 from app.domain.venda import Venda
 from app.repositories.cliente_repository import ClienteRepository
@@ -37,6 +38,9 @@ _LIMITE_CATEGORIAS = 3  # top 3 + "Outras" — teto validado da paleta categóri
 _SEM_CATEGORIA = "Sem categoria"
 _OUTRAS = "Outras"
 
+# Mesma régua do Motor de Insights: papéis que enxergam o financeiro.
+_PAPEIS_FINANCEIROS = (UserRole.SUPER_ADMIN, UserRole.ADMIN)
+
 
 def _dois_decimais(valor: Decimal) -> Decimal:
     # Math.Round(x, 2) do C# usa banker's rounding (ToEven) por padrão.
@@ -58,7 +62,9 @@ class DashboardService:
         self._produtos = ProdutoRepository(session)
         self._clientes = ClienteRepository(session)
 
-    def obter_dashboard(self) -> DashboardDto:
+    def obter_dashboard(self, role: UserRole) -> DashboardDto:
+        financeiro = role in _PAPEIS_FINANCEIROS
+
         vendas = self._vendas.get_all()
         produtos = self._produtos.get_all(search=None)
         clientes = self._clientes.get_all()
@@ -91,16 +97,16 @@ class DashboardService:
         hoje = agora.date()
         inicio_grafico = hoje - timedelta(days=_DIAS_DO_GRAFICO - 1)
         vendas_por_dia = [
-            self._resumo_do_dia(inicio_grafico + timedelta(days=offset), vendas_validas)
+            self._resumo_do_dia(inicio_grafico + timedelta(days=offset), vendas_validas, financeiro)
             for offset in range(_DIAS_DO_GRAFICO)
         ]
 
         return DashboardDto(
-            receita_30_dias=_kpi(receita_atual, receita_anterior),
+            receita_30_dias=_kpi(receita_atual, receita_anterior) if financeiro else None,
             vendas_30_dias=_kpi(Decimal(len(janela_atual)), Decimal(len(janela_anterior))),
-            ticket_medio_30_dias=_kpi(ticket_atual, ticket_anterior),
-            valor_estoque=float(valor_estoque),
-            receita_total=float(receita_total),
+            ticket_medio_30_dias=_kpi(ticket_atual, ticket_anterior) if financeiro else None,
+            valor_estoque=float(valor_estoque) if financeiro else None,
+            receita_total=float(receita_total) if financeiro else None,
             quantidade_vendas=len(vendas_validas),
             clientes_cadastrados=len(clientes),
             produtos_cadastrados=len(produtos),
@@ -109,18 +115,18 @@ class DashboardService:
             ),
             produtos_sem_estoque=sum(1 for produto in produtos if produto.estoque_atual == 0),
             vendas_por_dia=vendas_por_dia,
-            receita_por_categoria=self._receita_por_categoria(janela_atual, produtos),
-            top_produtos=self._top_produtos(janela_atual),
+            receita_por_categoria=self._receita_por_categoria(janela_atual, produtos) if financeiro else [],
+            top_produtos=self._top_produtos(janela_atual, financeiro),
             ultimas_vendas=self._ultimas_vendas(vendas),
             estoque_em_alerta=self._estoque_em_alerta(produtos),
         )
 
     @staticmethod
-    def _resumo_do_dia(dia: date, vendas_validas: list[Venda]) -> VendaPorDiaDto:
+    def _resumo_do_dia(dia: date, vendas_validas: list[Venda], financeiro: bool) -> VendaPorDiaDto:
         vendas_do_dia = [venda for venda in vendas_validas if venda.data_hora.date() == dia]
         return VendaPorDiaDto(
             data=dia,
-            total=float(_receita(vendas_do_dia)),
+            total=float(_receita(vendas_do_dia)) if financeiro else None,
             quantidade=len(vendas_do_dia),
         )
 
@@ -160,7 +166,7 @@ class DashboardService:
         ]
 
     @staticmethod
-    def _top_produtos(janela_atual: list[Venda]) -> list[TopProdutoDto]:
+    def _top_produtos(janela_atual: list[Venda], financeiro: bool) -> list[TopProdutoDto]:
         acumulado: dict[UUID, tuple[str, str, int, Decimal]] = {}
         for venda in janela_atual:
             for item in venda.itens:
@@ -174,10 +180,16 @@ class DashboardService:
                     receita + item.subtotal,
                 )
 
-        ordenados = sorted(acumulado.items(), key=lambda par: par[1][3], reverse=True)
+        # Admin ranqueia por receita; Funcionário por unidades vendidas (sem receita).
+        chave = (lambda par: par[1][3]) if financeiro else (lambda par: par[1][2])
+        ordenados = sorted(acumulado.items(), key=chave, reverse=True)
         return [
             TopProdutoDto(
-                produto_id=produto_id, nome=nome, sku=sku, quantidade=quantidade, receita=float(receita)
+                produto_id=produto_id,
+                nome=nome,
+                sku=sku,
+                quantidade=quantidade,
+                receita=float(receita) if financeiro else None,
             )
             for produto_id, (nome, sku, quantidade, receita) in ordenados[:_LIMITE_TOP_PRODUTOS]
         ]

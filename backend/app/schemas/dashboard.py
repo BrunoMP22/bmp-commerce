@@ -2,6 +2,9 @@
 
 KPIs principais usam janelas móveis de 30 dias com variação vs os 30 dias
 anteriores (mesma régua do Motor de Insights — nunca mês parcial vs mês fechado).
+
+Dashboard por papel (Doc 02 §6.1, ADR 0004): para Funcionário os campos
+financeiros vêm como None/vazios — o bloqueio é no back-end, nunca só na tela.
 """
 
 from __future__ import annotations
@@ -21,7 +24,8 @@ class KpiComVariacaoDto(CamelModel):
 
 class VendaPorDiaDto(CamelModel):
     data: date
-    total: float
+    # None para Funcionário (receita é financeira); quantidade é operacional.
+    total: float | None
     quantidade: int
 
 
@@ -36,7 +40,8 @@ class TopProdutoDto(CamelModel):
     nome: str
     sku: str
     quantidade: int
-    receita: float
+    # None para Funcionário — o ranking dele é por unidades vendidas.
+    receita: float | None
 
 
 class UltimaVendaDto(CamelModel):
@@ -59,13 +64,14 @@ class ProdutoEstoqueAlertaDto(CamelModel):
 
 class DashboardDto(CamelModel):
     # KPIs de janela: últimos 30 dias vs 30 dias anteriores.
-    receita_30_dias: KpiComVariacaoDto
+    # Os financeiros são None para Funcionário.
+    receita_30_dias: KpiComVariacaoDto | None
     vendas_30_dias: KpiComVariacaoDto
-    ticket_medio_30_dias: KpiComVariacaoDto
-    valor_estoque: float
+    ticket_medio_30_dias: KpiComVariacaoDto | None
+    valor_estoque: float | None
 
     # Totais gerais (histórico completo).
-    receita_total: float
+    receita_total: float | None
     quantidade_vendas: int
     clientes_cadastrados: int
     produtos_cadastrados: int

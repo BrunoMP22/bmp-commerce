@@ -14,8 +14,9 @@ O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e cl
 - ✅ **Insights**: motor de regras (ADR 0004) com 12 insights — faturamento/margem/ticket em movimento, previsão de ruptura, produtos encalhados, capital parado, clientes sumidos, concentração de receita, campeão de lucro, melhor dia da semana, vendas de balcão — cada um com severidade (Alerta/Oportunidade/Info) e **ação sugerida**; insights financeiros restritos a Admin no back-end
 - ✅ **Configurações**: tema claro/escuro/**sistema** (acompanha o dispositivo em tempo real), alteração de senha exigindo a senha atual (bloqueios no back-end, mensagens pt-BR), idioma/região do MVP e card "Sobre" com versão/ambiente da API
 - ✅ **Perfil**: foto de perfil com redimensionamento no navegador (256×256 antes do upload, validações de formato/tamanho no back-end), edição de nome, papel/vínculo/membro desde — avatar refletido no header; último placeholder do app eliminado
-- ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + ~70 vendas espalhadas por 90 dias com tendência de crescimento, criados automaticamente em banco vazio
-- ⏳ **Próximo passo**: perfil da empresa por tenant (logo) e dashboard por papel (Funcionário sem indicadores financeiros)
+- ✅ **Papéis na prática**: login de Funcionário (vendedora de demonstração) com **dashboard por papel** — indicadores financeiros nem saem do servidor para Funcionário (KPIs/gráfico/ranking viram versão operacional por contagem), mesma régua que já filtrava os Insights financeiros; atalhos de contas demo na tela de login
+- ✅ **Seed de demonstração**: admin + vendedora + 20 produtos + 15 clientes + ~70 vendas espalhadas por 90 dias com tendência de crescimento, criados automaticamente em banco vazio
+- ⏳ **Próximo passo**: perfil da empresa por tenant (logo) e gestão de usuários por tenant
 
 Detalhes em [docs/09-motor-de-insights.md](docs/09-motor-de-insights.md) e [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-sprint-2-fluxo-comercial-completo.md). O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
 
@@ -61,6 +62,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Sprint 4 — Configurações](docs/10-configuracoes.md) (tema, alteração de senha, sobre o sistema)
 - [Repaginada de UI — Dashboard executivo](docs/11-dashboard-executivo.md) (KPIs de janela, gráficos, paleta validada)
 - [Sprint 5 — Perfil](docs/12-perfil.md) (foto de perfil, edição de nome, conta e acesso)
+- [Papéis na prática — vendedora + dashboard por papel](docs/13-papeis-e-dashboard-por-papel.md)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)
@@ -104,15 +106,14 @@ npm run dev
 
 - Frontend: http://localhost:5173 (se a porta estiver ocupada, o Vite escolhe outra automaticamente — a API aceita qualquer origem `localhost`/`127.0.0.1` em desenvolvimento)
 
-### Credenciais do usuário administrador (seed)
+### Credenciais de demonstração (seed)
 
-| Campo | Valor |
-|---|---|
-| Email | `admin@bmpcommerce.com` |
-| Senha | `Admin@123` |
-| Papel | SuperAdmin (usuário de plataforma, sem tenant) |
+| Conta | Email | Senha | Papel |
+|---|---|---|---|
+| Administrador | `admin@bmpcommerce.com` | `Admin@123` | SuperAdmin (plataforma, sem tenant) — visão completa |
+| Vendedora | `vendedor@bmpcommerce.com` | `Vendedor@123` | Employee (tenant BMP Demo) — visão operacional, sem indicadores financeiros |
 
-> Credencial de desenvolvimento local, criada automaticamente pelo seed. Não usar em produção.
+> Credenciais de desenvolvimento local, criadas automaticamente pelo seed. Não usar em produção.
 
 ### Alternativa: Docker Compose
 

@@ -7,7 +7,8 @@ export interface KpiComVariacao {
 
 export interface VendaPorDia {
   data: string
-  total: number
+  /** null para Funcionário — receita é indicador financeiro. */
+  total: number | null
   quantidade: number
 }
 
@@ -22,7 +23,8 @@ export interface TopProduto {
   nome: string
   sku: string
   quantidade: number
-  receita: number
+  /** null para Funcionário — ranking dele é por unidades. */
+  receita: number | null
 }
 
 export interface UltimaVenda {
@@ -44,12 +46,13 @@ export interface ProdutoEstoqueAlerta {
 }
 
 export interface Dashboard {
-  receita30Dias: KpiComVariacao
+  /** Campos financeiros: null quando o papel é Funcionário (bloqueio no back-end). */
+  receita30Dias: KpiComVariacao | null
   vendas30Dias: KpiComVariacao
-  ticketMedio30Dias: KpiComVariacao
-  valorEstoque: number
+  ticketMedio30Dias: KpiComVariacao | null
+  valorEstoque: number | null
 
-  receitaTotal: number
+  receitaTotal: number | null
   quantidadeVendas: number
   clientesCadastrados: number
   produtosCadastrados: number

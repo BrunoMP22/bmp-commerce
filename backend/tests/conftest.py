@@ -30,9 +30,11 @@ from app.core.config import settings
 from app.core.security import generate_token, hash_password
 from app.database import get_db
 from app.domain.enums import UserRole
+from app.domain.tenant import Tenant
 from app.domain.usuario import Usuario
 from app.domain.value_objects import Email
 from app.models import Base
+from app.repositories.tenant_repository import TenantRepository
 from app.repositories.usuario_repository import UsuarioRepository
 
 
@@ -105,5 +107,34 @@ def auth_headers(admin_usuario: Usuario) -> dict[str, str]:
         email=admin_usuario.email.value,
         role=admin_usuario.role.value,
         tenant_id=admin_usuario.tenant_id,
+    )
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def employee_usuario(db_session: Session) -> Usuario:
+    tenant = Tenant("Empresa Teste", "Standard")
+    TenantRepository(db_session).add(tenant)
+
+    usuario = Usuario(
+        name="Funcionária Teste",
+        email=Email.create("funcionaria.teste@bmpcommerce.com"),
+        password_hash=hash_password("Senha@123"),
+        role=UserRole.EMPLOYEE,
+        tenant_id=tenant.id,
+    )
+    UsuarioRepository(db_session).add(usuario)
+    db_session.commit()
+    return usuario
+
+
+@pytest.fixture()
+def employee_headers(employee_usuario: Usuario) -> dict[str, str]:
+    token = generate_token(
+        user_id=employee_usuario.id,
+        name=employee_usuario.name,
+        email=employee_usuario.email.value,
+        role=employee_usuario.role.value,
+        tenant_id=employee_usuario.tenant_id,
     )
     return {"Authorization": f"Bearer {token}"}

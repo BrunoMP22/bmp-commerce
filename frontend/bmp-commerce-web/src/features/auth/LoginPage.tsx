@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Lock, Mail } from 'lucide-react'
+import { AlertCircle, Loader2, Lock, Mail, ShieldCheck, Store } from 'lucide-react'
 import { LogoMark } from '@/components/layout/BrandLogo'
 import { login } from '@/api/auth'
 import { useAuth } from '@/lib/auth-context'
@@ -21,6 +21,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) })
 
@@ -120,6 +121,37 @@ export function LoginPage() {
               Entrar
             </Button>
           </form>
+
+          <div className="mt-8">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">contas de demonstração</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => reset({ email: 'admin@bmpcommerce.com', password: 'Admin@123' })}
+              >
+                <ShieldCheck className="size-4" />
+                Administrador
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => reset({ email: 'vendedor@bmpcommerce.com', password: 'Vendedor@123' })}
+              >
+                <Store className="size-4" />
+                Vendedora
+              </Button>
+            </div>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Preenche o formulário — a vendedora vê a operação, sem os indicadores financeiros.
+            </p>
+          </div>
         </div>
       </div>
     </div>

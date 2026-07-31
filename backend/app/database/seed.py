@@ -48,6 +48,12 @@ from app.repositories.venda_repository import VendaRepository
 _ADMIN_EMAIL = "admin@bmpcommerce.com"
 _ADMIN_PASSWORD = "Admin@123"
 
+# Persona de demonstração do papel Funcionário: opera vendas e cadastros, mas o
+# back-end não entrega indicadores financeiros nem insights de margem/receita.
+_VENDEDORA_EMAIL = "vendedor@bmpcommerce.com"
+_VENDEDORA_PASSWORD = "Vendedor@123"
+_VENDEDORA_NOME = "Sofia Oliveira"
+
 # (nome, sku, descricao, codigo_barras, categoria, unidade, preco_custo, preco_venda, estoque_atual, estoque_minimo)
 _PRODUTOS_SEED = [
     ("Caneta Esferográfica Azul", "PAP-001", "Caixa com escrita macia 1.0mm", None, "Papelaria", UnidadeMedida.UNIDADE, "0.80", "1.90", 250, 50),
@@ -115,8 +121,10 @@ def seed_database(session: Session) -> None:
     clientes_repo = ClienteRepository(session)
     vendas_repo = VendaRepository(session)
 
-    if tenants.get_by_name("BMP Demo") is None:
-        tenants.add(Tenant("BMP Demo", "Standard"))
+    tenant = tenants.get_by_name("BMP Demo")
+    if tenant is None:
+        tenant = Tenant("BMP Demo", "Standard")
+        tenants.add(tenant)
 
     admin = usuarios.get_by_email(_ADMIN_EMAIL)
     if admin is None:
@@ -129,12 +137,23 @@ def seed_database(session: Session) -> None:
         )
         usuarios.add(admin)
 
+    vendedora = usuarios.get_by_email(_VENDEDORA_EMAIL)
+    if vendedora is None:
+        vendedora = Usuario(
+            name=_VENDEDORA_NOME,
+            email=Email.create(_VENDEDORA_EMAIL),
+            password_hash=hash_password(_VENDEDORA_PASSWORD),
+            role=UserRole.EMPLOYEE,
+            tenant_id=tenant.id,
+        )
+        usuarios.add(vendedora)
+
     produtos = _seed_produtos(session, produtos_repo)
     clientes = _seed_clientes(session, clientes_repo)
 
     session.commit()
 
-    _seed_vendas(session, vendas_repo, produtos_repo, admin, produtos, clientes)
+    _seed_vendas(session, vendas_repo, produtos_repo, [admin, vendedora], produtos, clientes)
 
     session.commit()
 
@@ -207,7 +226,7 @@ def _seed_vendas(
     session: Session,
     vendas_repo: VendaRepository,
     produtos_repo: ProdutoRepository,
-    admin: Usuario,
+    vendedores: list[Usuario],
     produtos: list[Produto],
     clientes: list[Cliente],
 ) -> None:
@@ -264,7 +283,7 @@ def _seed_vendas(
         if not itens:
             continue
 
-        venda = Venda.registrar(admin, cliente, itens, data_hora)
+        venda = Venda.registrar(rng.choice(vendedores), cliente, itens, data_hora)
         vendas.append(venda)
 
         vendas_repo.add(venda)
