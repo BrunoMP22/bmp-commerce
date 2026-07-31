@@ -2,19 +2,20 @@
 
 Sistema de e-commerce/gestão comercial multi-tenant, com backend em Python/FastAPI (Clean Architecture) e frontend em React + TypeScript.
 
-## Status atual: Sprint 2 — Fluxo comercial completo
+## Status atual: Sprint 3 — Motor de Insights
 
-O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e clientes → **registro de venda com baixa automática de estoque** → dashboard com indicadores e gráfico alimentados por dados reais.
+O sistema executa o ciclo comercial inteiro: login → cadastro de produtos e clientes → **registro de venda com baixa automática de estoque** → dashboard com indicadores → **aba Insights explicando o negócio em frases**, com ação sugerida em cada uma.
 
 - ✅ **Produtos**: CRUD completo com indicadores, busca, filtro, paginação e badges de estoque (Normal/Baixo/Sem estoque)
 - ✅ **Clientes**: CRUD completo com indicadores (total, ativos, inativos, novos no mês), CPF/CNPJ validado e formatado
 - ✅ **Vendas**: fluxo de venda estilo PDV (`/vendas/nova`) — cliente opcional (balcão), busca de produtos, carrinho com quantidades, resumo em tempo real; listagem com filtros por período/cliente/status, ordenação, detalhes e **cancelamento com estorno de estoque**
 - ✅ **Estoque**: baixa automática na venda, nunca negativo (venda bloqueada), concorrência otimista (409 em conflito), preço/custo **congelados** no item para margem histórica
 - ✅ **Dashboard**: receita total, vendas, ticket médio, valor do estoque, clientes, produtos, alertas de estoque + gráfico de vendas dos últimos 14 dias (Recharts)
-- ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + 20 vendas consistentes criados automaticamente em banco vazio
-- ⏳ **Próximo passo**: Motor de Insights (frases de negócio) e dashboard por papel
+- ✅ **Insights**: motor de regras (ADR 0004) com 12 insights — faturamento/margem/ticket em movimento, previsão de ruptura, produtos encalhados, capital parado, clientes sumidos, concentração de receita, campeão de lucro, melhor dia da semana, vendas de balcão — cada um com severidade (Alerta/Oportunidade/Info) e **ação sugerida**; insights financeiros restritos a Admin no back-end
+- ✅ **Seed de demonstração**: admin + 20 produtos + 15 clientes + ~70 vendas espalhadas por 90 dias com tendência de crescimento, criados automaticamente em banco vazio
+- ⏳ **Próximo passo**: dashboard por papel (Funcionário sem indicadores financeiros) e perfil da empresa
 
-Detalhes da sprint em [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-sprint-2-fluxo-comercial-completo.md). O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
+Detalhes em [docs/09-motor-de-insights.md](docs/09-motor-de-insights.md) e [docs/07-sprint-2-fluxo-comercial-completo.md](docs/07-sprint-2-fluxo-comercial-completo.md). O plano completo de sprints está em [docs/04-plano-de-implementacao-sprints.md](docs/04-plano-de-implementacao-sprints.md).
 
 ## Arquitetura
 
@@ -23,8 +24,9 @@ Clean Architecture com 4 camadas (api/routers → services → domain ← reposi
 ```
 backend/
   app/
-    api/routers/    Rotas REST — auth, produtos, clientes, vendas, dashboard
+    api/routers/    Rotas REST — auth, produtos, clientes, vendas, dashboard, insights
     services/       Casos de uso (equivalente a Application/Operations)
+    insights/       Motor de Insights: contrato, motor e regras isoladas (ADR 0004)
     domain/         Entidades, enums, value objects, exceções e regras de negócio puras
     repositories/   Ponte entre app/models (SQLAlchemy) e app/domain (puro)
     models/         Mapeamento SQLAlchemy (persistência)
@@ -53,6 +55,7 @@ docs/                            Documentação de produto, domínio e arquitetu
 - [Sprint 1.5 — Refinamento do MVP](docs/06-sprint-1.5-refinamento-mvp.md) (changelog + decisões + screenshots)
 - [Sprint 2 — Fluxo comercial completo](docs/07-sprint-2-fluxo-comercial-completo.md) (Clientes, Vendas, Estoque, Dashboard)
 - [Migração do backend: .NET → Python/FastAPI](docs/08-migracao-backend-python-fastapi.md)
+- [Sprint 3 — Motor de Insights](docs/09-motor-de-insights.md) (regras, decisões e como adicionar um insight)
 - [ADRs](docs/ADR/)
 - [Backend — arquitetura e convenções](backend/README.md)
 - [Frontend — stack e estrutura](frontend/bmp-commerce-web/README.md)

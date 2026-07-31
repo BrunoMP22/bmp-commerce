@@ -8,7 +8,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import auth_router, clientes_router, dashboard_router, produtos_router, vendas_router
+from app.api.routers import (
+    auth_router,
+    clientes_router,
+    dashboard_router,
+    insights_router,
+    produtos_router,
+    vendas_router,
+)
 from app.core.config import settings
 from app.database import SessionLocal, seed_database
 from app.middleware import register_exception_handlers
@@ -52,3 +59,4 @@ app.include_router(produtos_router)
 app.include_router(clientes_router)
 app.include_router(vendas_router)
 app.include_router(dashboard_router)
+app.include_router(insights_router)

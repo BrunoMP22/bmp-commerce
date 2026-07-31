@@ -9,8 +9,14 @@ Nota sobre determinismo: usamos `random.Random(42)` (PRNG do Python) em vez do
 não é bit-a-bit idêntica entre os dois backends, mas o processo continua igualmente
 determinístico (mesmo resultado a cada execução) e reproduz a mesma distribuição de
 cenários: produtos com estoque baixo/zerado, clientes inativos, vendas de balcão,
-vendas canceladas, tudo espalhado pelos últimos 14 dias (janela do gráfico do
-dashboard).
+vendas canceladas.
+
+As vendas cobrem os últimos 90 dias em três faixas de 30 dias com volume crescente
+(18 → 24 → 30 vendas), de propósito: as janelas móveis do Motor de Insights
+(últimos 30 dias vs 30 anteriores) encontram crescimento real de faturamento, e a
+faixa recente mantém o gráfico de 14 dias do dashboard povoado. Dois produtos de
+baixo giro são cadastrados com `created_at` retroativo para o insight de "produto
+encalhado" ter cenário desde o primeiro boot.
 """
 
 from __future__ import annotations
@@ -91,6 +97,16 @@ _CLIENTES_SEED = [
 # filtro de status terem dados.
 _CLIENTES_INATIVOS = (9, 11)
 
+# SKUs cadastrados "há 75 dias" (created_at retroativo). Como têm estoque baixo demais
+# para entrar nas vendas de demonstração (< 20 unidades), nunca venderam — cenário
+# pronto para o insight "produto encalhado".
+_SKUS_ENCALHADOS = ("ACC-003", "ACC-004")
+_DIAS_ENCALHADO = 75
+
+# Vendas por faixa de 30 dias, da mais antiga para a mais recente: volume crescente
+# para o insight "faturamento em alta" ter dado real.
+_VENDAS_POR_FAIXA = (18, 24, 30)
+
 
 def seed_database(session: Session) -> None:
     tenants = TenantRepository(session)
@@ -142,6 +158,8 @@ def _seed_produtos(session: Session, repo: ProdutoRepository) -> list[Produto]:
             estoque_atual=estoque_atual,
             estoque_minimo=estoque_minimo,
         )
+        if sku in _SKUS_ENCALHADOS:
+            produto.created_at = datetime.now(timezone.utc) - timedelta(days=_DIAS_ENCALHADO)
         repo.add(produto)
         produtos.append(produto)
 
@@ -210,9 +228,14 @@ def _seed_vendas(
 
     vendas: list[Venda] = []
 
-    for _ in range(20):
-        # Espalha as vendas pelos últimos 14 dias (janela do gráfico do dashboard).
-        dias_atras = rng.randint(0, 13)
+    # Faixas de 30 dias com volume crescente (ver nota no docstring do módulo):
+    # faixa 0 = dias 60-89 atrás, faixa 1 = 30-59, faixa 2 = 0-29 (mais vendas).
+    agenda: list[int] = []
+    for indice_faixa, quantidade_vendas in enumerate(_VENDAS_POR_FAIXA):
+        inicio_faixa = (len(_VENDAS_POR_FAIXA) - 1 - indice_faixa) * 30
+        agenda.extend(rng.randint(inicio_faixa, inicio_faixa + 29) for _ in range(quantidade_vendas))
+
+    for dias_atras in agenda:
         data_hora = (
             hoje
             - timedelta(days=dias_atras)

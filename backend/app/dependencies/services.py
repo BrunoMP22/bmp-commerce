@@ -9,7 +9,14 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.services import AuthService, ClienteService, DashboardService, ProdutoService, VendaService
+from app.services import (
+    AuthService,
+    ClienteService,
+    DashboardService,
+    InsightsService,
+    ProdutoService,
+    VendaService,
+)
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -34,8 +41,13 @@ def get_dashboard_service(session: DbSession) -> DashboardService:
     return DashboardService(session)
 
 
+def get_insights_service(session: DbSession) -> InsightsService:
+    return InsightsService(session)
+
+
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 ProdutoServiceDep = Annotated[ProdutoService, Depends(get_produto_service)]
 ClienteServiceDep = Annotated[ClienteService, Depends(get_cliente_service)]
 VendaServiceDep = Annotated[VendaService, Depends(get_venda_service)]
 DashboardServiceDep = Annotated[DashboardService, Depends(get_dashboard_service)]
+InsightsServiceDep = Annotated[InsightsService, Depends(get_insights_service)]
