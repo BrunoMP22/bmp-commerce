@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
-import { ChevronsLeft, ChevronsRight, LogOut, Sparkles, UserCircle, X } from 'lucide-react'
+import { ChevronsLeft, ChevronsRight, LogOut, UserCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { navItems } from '@/lib/nav-items'
 import { useAuth } from '@/lib/auth-context'
+import { LogoBadge } from '@/components/layout/BrandLogo'
 
 interface SidebarProps {
   collapsed: boolean
@@ -72,13 +73,11 @@ export function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobil
       >
         <div className="flex h-16 items-center justify-between gap-2 border-b border-border px-4">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="size-4" />
-            </div>
+            <LogoBadge className="size-8" />
             {!collapsed && (
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold leading-tight">BMP</p>
-                <p className="truncate text-[11px] leading-tight text-muted-foreground">Data &amp; Analytics</p>
+                <p className="truncate text-sm font-semibold leading-tight">BMP Commerce</p>
+                <p className="truncate text-[11px] leading-tight text-muted-foreground">Gestão comercial</p>
               </div>
             )}
           </div>

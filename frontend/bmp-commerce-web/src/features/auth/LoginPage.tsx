@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Lock, Mail, Sparkles } from 'lucide-react'
+import { AlertCircle, Loader2, Lock, Mail } from 'lucide-react'
+import { LogoMark } from '@/components/layout/BrandLogo'
 import { login } from '@/api/auth'
 import { useAuth } from '@/lib/auth-context'
 import { getErrorMessage } from '@/lib/errors'
@@ -45,9 +46,9 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen">
       <div className="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-slate-900 p-12 text-white lg:flex">
-        <div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <Sparkles className="size-5" />
-          BMP
+        <div className="flex items-center gap-2.5 text-lg font-semibold tracking-tight">
+          <LogoMark className="size-7" />
+          BMP Commerce
         </div>
 
         <div className="max-w-md space-y-3">
