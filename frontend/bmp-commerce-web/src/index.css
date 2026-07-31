@@ -3,6 +3,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* Faz os controles nativos (popup do <select>, scrollbars, date picker) seguirem o
+     tema — sem isso o navegador desenha o dropdown claro com texto claro no dark. */
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #0f172a;
   --card: #ffffff;
@@ -26,6 +29,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #0b0d12;
   --foreground: #e2e8f0;
   --card: #14171d;
@@ -73,6 +77,13 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Popup nativo do <select>: além do color-scheme, força as cores do tema nas
+     opções (Chromium/Windows respeita background/color em <option>). */
+  select option {
+    background-color: var(--color-card);
+    color: var(--color-card-foreground);
   }
 }
 
